@@ -1,0 +1,368 @@
+/* Text Marquee Section */
+.text-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--marquee-bg-color);
+}
+
+.text-marquee--full-width {
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;
+}
+
+.text-marquee__container {
+  height: var(--marquee-height);
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.text-marquee__wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.text-marquee__content {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+  animation: marqueeScroll var(--marquee-speed) linear infinite;
+  animation-direction: var(--marquee-direction);
+  will-change: transform;
+}
+
+.text-marquee__text {
+  display: inline-block;
+  font-family: var(--marquee-font-family);
+  font-size: var(--marquee-font-size);
+  font-weight: var(--marquee-font-weight);
+  font-stretch: var(--marquee-font-stretch);
+  letter-spacing: var(--marquee-letter-spacing);
+  line-height: var(--marquee-line-height);
+  text-transform: var(--text-transform, uppercase);
+  padding-right: 2rem;
+  flex-shrink: 0;
+  
+  /* Gradient Text Implementation */
+  background: var(--marquee-gradient, var(--marquee-text-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--marquee-text-color); /* Fallback */
+  
+  /* Text Outline */
+  -webkit-text-stroke: var(--marquee-outline-width) var(--marquee-outline-color);
+  text-stroke: var(--marquee-outline-width) var(--marquee-outline-color);
+  
+  /* Enhanced Text Rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  /* Performance Optimization */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Gradient Text Support Check */
+@supports not (background-clip: text) {
+  .text-marquee__text {
+    color: var(--marquee-text-color);
+    -webkit-text-fill-color: var(--marquee-text-color);
+  }
+}
+
+/* Text Effects */
+.text-marquee__text {
+  /* Glow Effect */
+  text-shadow: 
+    0 0 calc(var(--marquee-glow-intensity) * 0.5px) var(--marquee-glow-color),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color),
+    0 0 calc(var(--marquee-glow-intensity) * 2px) var(--marquee-glow-color);
+}
+
+/* 3D Shadow Depth Effect */
+.text-marquee[data-shadow-depth="1"] .text-marquee__text {
+  text-shadow: 
+    1px 1px 0 rgba(0,0,0,0.8),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color);
+}
+
+.text-marquee[data-shadow-depth="2"] .text-marquee__text {
+  text-shadow: 
+    1px 1px 0 rgba(0,0,0,0.8),
+    2px 2px 0 rgba(0,0,0,0.6),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color);
+}
+
+.text-marquee[data-shadow-depth="3"] .text-marquee__text {
+  text-shadow: 
+    1px 1px 0 rgba(0,0,0,0.8),
+    2px 2px 0 rgba(0,0,0,0.6),
+    3px 3px 0 rgba(0,0,0,0.4),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color);
+}
+
+.text-marquee[data-shadow-depth="4"] .text-marquee__text {
+  text-shadow: 
+    1px 1px 0 rgba(0,0,0,0.8),
+    2px 2px 0 rgba(0,0,0,0.6),
+    3px 3px 0 rgba(0,0,0,0.4),
+    4px 4px 0 rgba(0,0,0,0.2),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color);
+}
+
+.text-marquee[data-shadow-depth="5"] .text-marquee__text {
+  text-shadow: 
+    1px 1px 0 rgba(0,0,0,0.8),
+    2px 2px 0 rgba(0,0,0,0.6),
+    3px 3px 0 rgba(0,0,0,0.4),
+    4px 4px 0 rgba(0,0,0,0.2),
+    5px 5px 0 rgba(0,0,0,0.1),
+    0 0 calc(var(--marquee-glow-intensity) * 1px) var(--marquee-glow-color);
+}
+
+/* Animated Gradient Support */
+.text-marquee--animated-gradient .text-marquee__text {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Enhanced Hover Effects */
+.text-marquee:hover .text-marquee__text {
+  filter: brightness(1.1) saturate(1.1);
+  transition: filter 0.3s ease;
+}
+
+/* Creative Font Specific Adjustments */
+.text-marquee[data-font="orbitron"] .text-marquee__text {
+  letter-spacing: calc(var(--marquee-letter-spacing) + 1px);
+}
+
+.text-marquee[data-font="teko"] .text-marquee__text {
+  font-stretch: condensed;
+  letter-spacing: calc(var(--marquee-letter-spacing) + 0.5px);
+}
+
+.text-marquee[data-font="bebas_neue"] .text-marquee__text {
+  letter-spacing: calc(var(--marquee-letter-spacing) + 1.5px);
+}
+
+.text-marquee[data-font="russo_one"] .text-marquee__text {
+  letter-spacing: calc(var(--marquee-letter-spacing) + 0.8px);
+}
+
+/* Keyframe animations for seamless scrolling */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause animation on hover if enabled */
+.text-marquee[data-pause-on-hover="true"]:hover .text-marquee__content {
+  animation-play-state: paused;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 749px) {
+  .text-marquee__text {
+    padding-right: 1.5rem;
+    letter-spacing: 0.3px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .text-marquee__text {
+    padding-right: 1rem;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .text-marquee__content {
+    animation: marqueeScrollReduced var(--marquee-speed) linear infinite;
+  }
+  
+  @keyframes marqueeScrollReduced {
+    0%, 95% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-marquee {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+  }
+}
+
+/* Focus management for accessibility */
+.text-marquee:focus-within .text-marquee__content {
+  animation-play-state: paused;
+}
+
+/* Smooth hardware acceleration */
+.text-marquee__content {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Loading state */
+.text-marquee.is-loading .text-marquee__content {
+  opacity: 0.7;
+}
+
+/* Theme editor compatibility */
+.shopify-section .text-marquee {
+  transition: all 0.3s ease;
+}
+
+/* Dark mode support (if implemented in theme) */
+@media (prefers-color-scheme: dark) {
+  .text-marquee {
+    --marquee-text-color: #ffffff;
+    --marquee-bg-color: #000000;
+  }
+}
+
+/* Text selection prevention for better UX */
+.text-marquee__text {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Additional text transform styles */
+.text-marquee[data-text-transform="none"] .text-marquee__text {
+  text-transform: none;
+}
+
+.text-marquee[data-text-transform="uppercase"] .text-marquee__text {
+  text-transform: uppercase;
+}
+
+.text-marquee[data-text-transform="lowercase"] .text-marquee__text {
+  text-transform: lowercase;
+}
+
+.text-marquee[data-text-transform="capitalize"] .text-marquee__text {
+  text-transform: capitalize;
+}
+
+/* Performance optimizations */
+.text-marquee__content {
+  contain: layout style paint;
+}
+
+/* Fallback for browsers without CSS custom properties */
+.no-cssvars .text-marquee {
+  background-color: #000000;
+}
+
+.no-cssvars .text-marquee__text {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.no-cssvars .text-marquee__container {
+  height: 50px;
+}
+
+.no-cssvars .text-marquee__content {
+  animation-duration: 30s;
+}
+
+/* Print styles */
+@media print {
+  .text-marquee {
+    display: none;
+  }
+}
+
+/* Enhanced hover effects */
+.text-marquee:hover {
+  cursor: default;
+}
+
+/* Better text rendering */
+.text-marquee__text {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* RTL language support */
+[dir="rtl"] .text-marquee__content {
+  animation-direction: reverse;
+}
+
+[dir="rtl"] .text-marquee[data-scroll-direction="left_to_right"] .text-marquee__content {
+  animation-direction: normal;
+}
+
+/* Ensure proper stacking context */
+.text-marquee {
+  z-index: 1;
+  position: relative;
+}
+
+/* Smooth transition for dynamic speed changes */
+.text-marquee__content {
+  transition: animation-duration 0.3s ease;
+}
+
+/* Emergency stop for accessibility */
+.text-marquee.motion-stop .text-marquee__content {
+  animation-play-state: paused !important;
+}
+
+/* Gradient fade effects (optional enhancement) */
+.text-marquee--fade-edges::before,
+.text-marquee--fade-edges::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.text-marquee--fade-edges::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--marquee-bg-color), transparent);
+}
+
+.text-marquee--fade-edges::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--marquee-bg-color), transparent);
+}

@@ -1,0 +1,272 @@
+{{ 'section-configurable-search-modal.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .configurable-search-modal-{{ section.id }} {
+    --search-modal-bg: {{ section.settings.modal_background_color }};
+    --search-modal-overlay-color: {{ section.settings.overlay_color }};
+    --search-modal-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    --search-input-bg: {{ section.settings.input_background_color }};
+    --search-input-text: {{ section.settings.input_text_color }};
+    --search-input-border: {{ section.settings.input_border_color }};
+    --search-modal-animation-speed: {{ section.settings.animation_speed }}ms;
+    --search-modal-blur-intensity: {{ section.settings.blur_intensity }}px;
+  }
+{%- endstyle -%}
+
+<div class="configurable-search-modal configurable-search-modal-{{ section.id }}">
+  <details-modal class="header__search">
+    <details>
+      <summary class="header__icon header__icon--search header__icon--summary link focus-inset modal__toggle"
+               aria-haspopup="dialog"
+               aria-label="{{ 'general.search.search' | t }}">
+        <span>
+          {% if section.settings.show_search_icon %}
+            <span class="svg-wrapper">
+              {{- 'icon-search.svg' | inline_asset_content -}}
+            </span>
+          {% endif %}
+          <span class="svg-wrapper header__icon-close">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </span>
+      </summary>
+      
+      <div class="search-modal modal__content gradient"
+           role="dialog"
+           aria-modal="true"
+           aria-label="{{ 'general.search.search' | t }}">
+        <div class="modal-overlay"></div>
+        
+        <div class="search-modal__content search-modal__content-bottom" tabindex="-1">
+          <search-form class="search-modal__form">
+            <form action="{{ routes.search_url }}" method="get" role="search" class="search search-modal__form">
+              <div class="field">
+                <input class="search__input field__input"
+                       id="configurable-search-{{ section.id }}"
+                       type="search"
+                       name="q"
+                       value="{{ search.terms | escape }}"
+                       placeholder="{{ section.settings.search_placeholder | default: 'Search...' }}">
+                <label class="field__label" for="configurable-search-{{ section.id }}">
+                  {{ section.settings.search_placeholder | default: 'Search...' }}
+                </label>
+                <input type="hidden" name="options[prefix]" value="last">
+                
+                {% if section.settings.show_search_button %}
+                  <button class="search__button field__button" aria-label="{{ 'general.search.search' | t }}">
+                    <span class="svg-wrapper">
+                      {{- 'icon-search.svg' | inline_asset_content -}}
+                    </span>
+                  </button>
+                {% endif %}
+              </div>
+            </form>
+          </search-form>
+
+          <!-- Popular Searches -->
+          {% if section.settings.show_popular_searches and section.blocks.size > 0 %}
+            <div class="configurable-search-popular">
+              {% if section.settings.popular_searches_heading != blank %}
+                <h3 class="configurable-search-popular__heading">
+                  {{ section.settings.popular_searches_heading }}
+                </h3>
+              {% endif %}
+              
+              <div class="configurable-search-popular__items">
+                {% for block in section.blocks %}
+                  {% if block.type == 'popular_search' %}
+                    <a href="{{ routes.search_url }}?q={{ block.settings.search_term | url_encode }}"
+                       class="configurable-search-popular__item"
+                       {{ block.shopify_attributes }}>
+                      {% if block.settings.show_icon and block.settings.item_icon != blank %}
+                        <span class="configurable-search-popular__icon">
+                          {{ block.settings.item_icon }}
+                        </span>
+                      {% endif %}
+                      <span class="configurable-search-popular__text">
+                        {{ block.settings.search_term }}
+                      </span>
+                    </a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <button type="button"
+                  class="search-modal__close-button modal__close-button link link--text focus-inset"
+                  aria-label="{{ 'accessibility.close' | t }}">
+            <span class="svg-wrapper">
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </span>
+          </button>
+        </div>
+      </div>
+    </details>
+  </details-modal>
+</div>
+
+<script src="{{ 'configurable-search-modal.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Configurable Search Modal",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Modal Background"
+    },
+    {
+      "type": "color",
+      "id": "modal_background_color",
+      "default": "#000000",
+      "label": "Modal background color"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "default": "#000000",
+      "label": "Background overlay color"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80,
+      "label": "Overlay opacity"
+    },
+    {
+      "type": "range",
+      "id": "blur_intensity",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 5,
+      "label": "Background blur intensity"
+    },
+    {
+      "type": "header",
+      "content": "Search Input"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "default": "Search products...",
+      "label": "Search placeholder text"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "default": "#ffffff",
+      "label": "Input background color"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "default": "#000000",
+      "label": "Input text color"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "default": "#cccccc",
+      "label": "Input border color"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_icon",
+      "default": true,
+      "label": "Show search icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_button",
+      "default": true,
+      "label": "Show search button"
+    },
+    {
+      "type": "header",
+      "content": "Popular Searches"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_popular_searches",
+      "default": true,
+      "label": "Show popular searches"
+    },
+    {
+      "type": "text",
+      "id": "popular_searches_heading",
+      "default": "Popular searches",
+      "label": "Popular searches heading"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "min": 150,
+      "max": 800,
+      "step": 50,
+      "unit": "ms",
+      "default": 300,
+      "label": "Animation speed"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "popular_search",
+      "name": "Popular Search Term",
+      "settings": [
+        {
+          "type": "text",
+          "id": "search_term",
+          "label": "Search term"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon",
+          "default": false,
+          "label": "Show icon"
+        },
+        {
+          "type": "text",
+          "id": "item_icon",
+          "label": "Icon (emoji or text)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Configurable Search Modal",
+      "blocks": [
+        {
+          "type": "popular_search",
+          "settings": {
+            "search_term": "Laptops",
+            "show_icon": true,
+            "item_icon": "💻"
+          }
+        },
+        {
+          "type": "popular_search",
+          "settings": {
+            "search_term": "Headphones",
+            "show_icon": true,
+            "item_icon": "🎧"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

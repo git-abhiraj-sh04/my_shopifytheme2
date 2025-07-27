@@ -1,0 +1,628 @@
+{{ 'section-text-marquee.css' | asset_url | stylesheet_tag }}
+
+{% comment %} Google Fonts Import {% endcomment %}
+{% if section.settings.custom_font != 'theme_default' %}
+  {% case section.settings.custom_font %}
+    {% when 'orbitron' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&display=swap" rel="stylesheet">
+    {% when 'exo_2' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    {% when 'rajdhani' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% when 'teko' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% when 'russo_one' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    {% when 'bebas_neue' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  {% endcase %}
+{% endif %}
+
+{%- style -%}
+  .text-marquee-{{ section.id }} {
+    --marquee-text-color: {{ section.settings.text_color }};
+    --marquee-bg-color: {{ section.settings.background_color }};
+    --marquee-font-size: {{ section.settings.font_size }}px;
+    --marquee-font-weight: {{ section.settings.font_weight }};
+    --marquee-font-stretch: {{ section.settings.font_stretch }};
+    --marquee-letter-spacing: {{ section.settings.letter_spacing }}px;
+    --marquee-line-height: {{ section.settings.line_height }};
+    --marquee-speed: {{ section.settings.scroll_speed }}s;
+    --marquee-height: {{ section.settings.marquee_height }}px;
+    --marquee-direction: {% if section.settings.scroll_direction == 'right_to_left' %}reverse{% else %}normal{% endif %};
+    
+    {% comment %} Gradient Settings {% endcomment %}
+    {% if section.settings.use_gradient %}
+      {% case section.settings.gradient_preset %}
+        {% when 'electric_blue' %}
+          --marquee-gradient: linear-gradient(45deg, #4de6ff, #66ccff, #80b3ff);
+        {% when 'neon_gaming' %}
+          --marquee-gradient: linear-gradient(90deg, #ff0080, #ff8000, #00ff80);
+        {% when 'digital_purple' %}
+          --marquee-gradient: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        {% when 'cyber_orange' %}
+          --marquee-gradient: linear-gradient(45deg, #ff8008, #ffc837, #ff6b6b);
+        {% when 'gold_shine' %}
+          --marquee-gradient: linear-gradient(45deg, #ffd700, #ffed4a, #f39c12);
+        {% when 'silver_chrome' %}
+          --marquee-gradient: linear-gradient(90deg, #bdc3c7, #2c3e50, #ecf0f1);
+        {% when 'rose_gold' %}
+          --marquee-gradient: linear-gradient(135deg, #ff9a9e, #fecfef, #fecfef);
+        {% when 'rainbow_flow' %}
+          --marquee-gradient: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #00ff00, #0080ff, #8000ff);
+        {% when 'sunset_wave' %}
+          --marquee-gradient: linear-gradient(90deg, #ff512f, #f09819, #ff512f);
+        {% when 'ocean_breeze' %}
+          --marquee-gradient: linear-gradient(135deg, #667eea, #764ba2, #667eea);
+        {% when 'custom' %}
+          --marquee-gradient: linear-gradient({{ section.settings.gradient_direction }}deg, {{ section.settings.gradient_color_1 }}, {{ section.settings.gradient_color_2 }}, {{ section.settings.gradient_color_3 }});
+        {% else %}
+          --marquee-gradient: linear-gradient(45deg, #00d4ff, #0099cc, #0066ff);
+      {% endcase %}
+    {% endif %}
+    
+    {% comment %} Font Family {% endcomment %}
+    {% case section.settings.custom_font %}
+      {% when 'orbitron' %}
+        --marquee-font-family: 'Orbitron', sans-serif;
+      {% when 'exo_2' %}
+        --marquee-font-family: 'Exo 2', sans-serif;
+      {% when 'rajdhani' %}
+        --marquee-font-family: 'Rajdhani', sans-serif;
+      {% when 'teko' %}
+        --marquee-font-family: 'Teko', sans-serif;
+      {% when 'russo_one' %}
+        --marquee-font-family: 'Russo One', sans-serif;
+      {% when 'bebas_neue' %}
+        --marquee-font-family: 'Bebas Neue', sans-serif;
+      {% when 'impact' %}
+        --marquee-font-family: Impact, 'Arial Black', sans-serif;
+      {% else %}
+        --marquee-font-family: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
+    {% endcase %}
+    
+    {% comment %} Visual Effects {% endcomment %}
+    --marquee-outline-width: {{ section.settings.outline_width }}px;
+    --marquee-outline-color: {{ section.settings.outline_color }};
+    --marquee-glow-intensity: {{ section.settings.glow_intensity }};
+    --marquee-glow-color: {{ section.settings.glow_color }};
+    --marquee-shadow-depth: {{ section.settings.shadow_depth }};
+    
+    background-color: {{ section.settings.background_color }};
+    {% if section.settings.background_opacity < 100 %}
+      background-color: {{ section.settings.background_color | color_modify: 'alpha', section.settings.background_opacity | divided_by: 100.0 }};
+    {% endif %}
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+    
+    .text-marquee-{{ section.id }} {
+      --marquee-font-size: {{ section.settings.font_size | times: 1.8 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .text-marquee-{{ section.id }} {
+      --marquee-font-size: {{ section.settings.font_size | times: 1.4 }}px;
+    }
+  }
+
+  {% if section.settings.pause_on_hover %}
+  .text-marquee-{{ section.id }}:hover .text-marquee__content {
+    animation-play-state: paused;
+  }
+  {% endif %}
+{%- endstyle -%}
+
+<div class="text-marquee text-marquee-{{ section.id }} section-{{ section.id }}-padding{% if section.settings.full_width %} text-marquee--full-width{% endif %}{% if section.settings.use_gradient and section.settings.gradient_preset contains 'animated' %} text-marquee--animated-gradient{% endif %}"
+     data-scroll-speed="{{ section.settings.scroll_speed }}"
+     data-scroll-direction="{{ section.settings.scroll_direction }}"
+     data-pause-on-hover="{{ section.settings.pause_on_hover }}"
+     data-font="{{ section.settings.custom_font }}"
+     data-shadow-depth="{{ section.settings.shadow_depth }}"
+     data-text-transform="{{ section.settings.text_transform }}">
+  
+  <div class="text-marquee__container">
+    <div class="text-marquee__wrapper">
+      <div class="text-marquee__content" aria-label="{{ section.settings.marquee_text | escape }}">
+        {% if section.settings.marquee_text != blank %}
+          {% assign separator = section.settings.text_separator | default: ' • ' %}
+          {% assign repeated_text = '' %}
+          
+          {% comment %} Create enough repetitions to ensure seamless scrolling {% endcomment %}
+          {% for i in (1..10) %}
+            {% assign repeated_text = repeated_text | append: section.settings.marquee_text | append: separator %}
+          {% endfor %}
+          
+          <span class="text-marquee__text">{{ repeated_text }}</span>
+          <span class="text-marquee__text" aria-hidden="true">{{ repeated_text }}</span>
+        {% else %}
+          {% comment %} Default text if none provided {% endcomment %}
+          {% assign default_text = 'Welcome to our store • Free shipping on orders over $50 • New arrivals weekly • ' %}
+          <span class="text-marquee__text">{{ default_text }}{{ default_text }}{{ default_text }}</span>
+          <span class="text-marquee__text" aria-hidden="true">{{ default_text }}{{ default_text }}{{ default_text }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'text-marquee.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Text Marquee",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "textarea",
+      "id": "marquee_text",
+      "default": "Welcome to our electronics store • Free shipping on all orders • Latest tech arrivals • Gaming gear specialists",
+      "label": "Scrolling text",
+      "info": "The text that will scroll across the screen"
+    },
+    {
+      "type": "text",
+      "id": "text_separator",
+      "default": " • ",
+      "label": "Text separator",
+      "info": "Character(s) between repeated text (e.g., • | - ★)"
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "select",
+      "id": "scroll_direction",
+      "options": [
+        {
+          "value": "left_to_right",
+          "label": "Left to Right"
+        },
+        {
+          "value": "right_to_left",
+          "label": "Right to Left"
+        }
+      ],
+      "default": "right_to_left",
+      "label": "Scroll direction"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "s",
+      "default": 30,
+      "label": "Scroll speed",
+      "info": "Lower values = faster scrolling"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "default": true,
+      "label": "Pause scrolling on hover"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "custom_font",
+      "options": [
+        {
+          "value": "theme_default",
+          "label": "Theme Default"
+        },
+        {
+          "value": "orbitron",
+          "label": "Orbitron (Futuristic)"
+        },
+        {
+          "value": "exo_2",
+          "label": "Exo 2 (Sci-Fi)"
+        },
+        {
+          "value": "rajdhani",
+          "label": "Rajdhani (Tech)"
+        },
+        {
+          "value": "teko",
+          "label": "Teko (Condensed)"
+        },
+        {
+          "value": "russo_one",
+          "label": "Russo One (Gaming)"
+        },
+        {
+          "value": "bebas_neue",
+          "label": "Bebas Neue (Classic)"
+        },
+        {
+          "value": "impact",
+          "label": "Impact (System Font)"
+        }
+      ],
+      "default": "orbitron",
+      "label": "Font family",
+      "info": "Creative fonts for maximum impact"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 40,
+      "max": 180,
+      "step": 4,
+      "unit": "px",
+      "default": 96,
+      "label": "Font size",
+      "info": "Scales 1.8x on desktop, 1.4x on mobile"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold"
+        },
+        {
+          "value": "900",
+          "label": "Black"
+        }
+      ],
+      "default": "700",
+      "label": "Font weight"
+    },
+    {
+      "type": "select",
+      "id": "font_stretch",
+      "options": [
+        {
+          "value": "condensed",
+          "label": "Condensed"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "expanded",
+          "label": "Expanded"
+        }
+      ],
+      "default": "normal",
+      "label": "Font stretch"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "min": 0,
+      "max": 8,
+      "step": 0.5,
+      "unit": "px",
+      "default": 2,
+      "label": "Letter spacing"
+    },
+    {
+      "type": "range",
+      "id": "line_height",
+      "min": 0.8,
+      "max": 1.4,
+      "step": 0.1,
+      "default": 1.0,
+      "label": "Line height"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "Normal"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        },
+        {
+          "value": "lowercase",
+          "label": "lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "uppercase",
+      "label": "Text transform"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Gradients"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "default": true,
+      "label": "Use gradient text",
+      "info": "Enable for multi-color gradient effects"
+    },
+    {
+      "type": "select",
+      "id": "gradient_preset",
+      "options": [
+        {
+          "value": "electric_blue",
+          "label": "Electric Blue (Tech)"
+        },
+        {
+          "value": "neon_gaming",
+          "label": "Neon Gaming (Pink/Orange/Green)"
+        },
+        {
+          "value": "digital_purple",
+          "label": "Digital Purple (Modern)"
+        },
+        {
+          "value": "cyber_orange",
+          "label": "Cyber Orange (Energy)"
+        },
+        {
+          "value": "gold_shine",
+          "label": "Gold Shine (Premium)"
+        },
+        {
+          "value": "silver_chrome",
+          "label": "Silver Chrome (Metallic)"
+        },
+        {
+          "value": "rose_gold",
+          "label": "Rose Gold (Elegant)"
+        },
+        {
+          "value": "rainbow_flow",
+          "label": "Rainbow Flow (Vibrant)"
+        },
+        {
+          "value": "sunset_wave",
+          "label": "Sunset Wave (Warm)"
+        },
+        {
+          "value": "ocean_breeze",
+          "label": "Ocean Breeze (Cool)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Colors"
+        }
+      ],
+      "default": "electric_blue",
+      "label": "Gradient preset"
+    },
+    {
+      "type": "range",
+      "id": "gradient_direction",
+      "min": 0,
+      "max": 360,
+      "step": 45,
+      "unit": "deg",
+      "default": 45,
+      "label": "Gradient direction",
+      "info": "Only applies to custom gradient"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_1",
+      "default": "#00d4ff",
+      "label": "Custom gradient color 1",
+      "info": "Only applies to custom gradient"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_2",
+      "default": "#0099cc",
+      "label": "Custom gradient color 2",
+      "info": "Only applies to custom gradient"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_3",
+      "default": "#0066ff",
+      "label": "Custom gradient color 3",
+      "info": "Only applies to custom gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#ffffff",
+      "label": "Fallback text color",
+      "info": "Used when gradients are disabled"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "default": "#000000",
+      "label": "Background color"
+    },
+    {
+      "type": "range",
+      "id": "background_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "label": "Background opacity"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": true,
+      "label": "Full width",
+      "info": "Extend banner across full browser width"
+    },
+    {
+      "type": "range",
+      "id": "marquee_height",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 150,
+      "label": "Banner height"
+    },
+    {
+      "type": "header",
+      "content": "Visual Effects"
+    },
+    {
+      "type": "range",
+      "id": "outline_width",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "label": "Text outline width",
+      "info": "Add outline for better contrast"
+    },
+    {
+      "type": "color",
+      "id": "outline_color",
+      "default": "#000000",
+      "label": "Outline color"
+    },
+    {
+      "type": "range",
+      "id": "glow_intensity",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 10,
+      "label": "Glow intensity",
+      "info": "Text glow/shadow effect"
+    },
+    {
+      "type": "color",
+      "id": "glow_color",
+      "default": "#00d4ff",
+      "label": "Glow color"
+    },
+    {
+      "type": "range",
+      "id": "shadow_depth",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 3,
+      "label": "3D shadow depth",
+      "info": "Multiple shadows for 3D effect"
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text Marquee",
+      "settings": {
+        "marquee_text": "Welcome to our electronics store • Free shipping on all orders • Latest tech arrivals • Gaming gear specialists",
+        "scroll_direction": "right_to_left",
+        "scroll_speed": 30,
+        "custom_font": "orbitron",
+        "font_size": 96,
+        "font_weight": "700",
+        "font_stretch": "normal",
+        "letter_spacing": 2,
+        "line_height": 1.0,
+        "use_gradient": true,
+        "gradient_preset": "electric_blue",
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "full_width": true,
+        "marquee_height": 150,
+        "outline_width": 2,
+        "outline_color": "#000000",
+        "glow_intensity": 10,
+        "glow_color": "#00d4ff",
+        "shadow_depth": 3
+      }
+    }
+  ]
+}
+{% endschema %}

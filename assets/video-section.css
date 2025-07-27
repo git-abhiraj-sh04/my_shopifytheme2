@@ -1,0 +1,125 @@
+.video-section__media {
+  --ratio-percent: 56.25%;
+  position: relative;
+  padding-bottom: calc(var(--ratio-percent) - var(--media-border-width));
+}
+
+/* Needed for gradient continuity with or without animation so that transparent PNG images come up as we would expect */
+.scroll-trigger:where(.gradient.video-section__media) {
+  background: transparent;
+}
+
+.video-section__media.global-media-settings--full-width {
+  padding-bottom: var(--ratio-percent);
+}
+
+.video-section__media.deferred-media {
+  box-shadow: var(--media-shadow-horizontal-offset) var(--media-shadow-vertical-offset) var(--media-shadow-blur-radius)
+    rgba(var(--color-shadow), var(--media-shadow-opacity));
+}
+
+.video-section__media.deferred-media:after {
+  content: none;
+}
+
+.video-section__poster.deferred-media__poster:focus {
+  outline-offset: 0.3rem;
+}
+
+.video-section__media iframe {
+  background-color: rgba(var(--color-foreground), 0.03);
+  border: 0;
+}
+
+.video-section__poster,
+.video-section__media iframe,
+.video-section__media video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.video-section__media video {
+  background: #000000;
+}
+
+.video-section__media.media-fit-cover video {
+  object-fit: cover;
+}
+
+/* Autoplay video styles - no controls, no interactions */
+.video-section__media--autoplay {
+  box-shadow: var(--media-shadow-horizontal-offset) var(--media-shadow-vertical-offset) var(--media-shadow-blur-radius)
+    rgba(var(--color-shadow), var(--media-shadow-opacity));
+}
+
+.video-section__media--autoplay:after {
+  content: none;
+}
+
+.video-section__iframe,
+.video-section__video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000000;
+  object-fit: cover;
+}
+
+/* Hide any video controls completely */
+.video-section__video::-webkit-media-controls {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-timeline {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-current-time-display {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-time-remaining-display {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-mute-button {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-volume-slider {
+  display: none !important;
+}
+
+.video-section__video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+
+/* Firefox video controls */
+.video-section__video::-moz-media-controls {
+  display: none !important;
+}
+
+/* Remove any pointer events to prevent interaction */
+.video-section__iframe,
+.video-section__video {
+  pointer-events: none;
+}
+
+/* Override iframe pointer events for YouTube/Vimeo to prevent controls */
+.video-section__iframe {
+  pointer-events: none;
+}

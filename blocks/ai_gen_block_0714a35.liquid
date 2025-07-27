@@ -1,0 +1,846 @@
+{% doc %}
+  @prompt
+    Create an interactive image hotspot component that allows adding clickable points on an image with detailed information popups or tooltips. The hotspots should be customizable with different positions, titles, descriptions, and styling options.
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-image-hotspot-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+  }
+
+  .ai-image-hotspot-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-image-hotspot-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-image-hotspot-placeholder-{{ ai_gen_id }} {
+    background-color: #f4f4f4;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;}
+
+  .ai-image-hotspot-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 400px;
+  }
+
+  .ai-hotspot-point-{{ ai_gen_id }} {
+    position: absolute;
+    top: var(--hotspot-y);
+    left: var(--hotspot-x);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+
+  .ai-hotspot-marker-{{ ai_gen_id }} {
+    width: {{ block.settings.hotspot_size }}px;
+    height: {{ block.settings.hotspot_size }}px;
+    border-radius: 50%;
+    background-color: {{ block.settings.hotspot_color }};
+    border: {{ block.settings.hotspot_border_width }}px solid {{ block.settings.hotspot_border_color }};
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-hotspot-marker-{{ ai_gen_id }}:hover {
+    transform: scale({{ block.settings.hotspot_hover_scale }});
+    background-color: {{ block.settings.hotspot_hover_color }};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .ai-hotspot-marker-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: {{ block.settings.hotspot_color }};
+    opacity: 0.3;
+    animation: ai-hotspot-pulse-{{ ai_gen_id }} 2s infinite;
+  }
+
+  @keyframes ai-hotspot-pulse-{{ ai_gen_id }} {
+    0% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+  }
+
+  .ai-hotspot-icon-{{ ai_gen_id }} {
+    width: calc({{ block.settings.hotspot_size }}px * 0.5);
+    height: calc({{ block.settings.hotspot_size }}px * 0.5);
+    color: {{ block.settings.hotspot_icon_color }};
+    z-index: 1;
+    position: relative;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }} {
+    position: absolute;
+    background-color: {{ block.settings.tooltip_bg_color }};
+    color: {{ block.settings.tooltip_text_color }};
+    padding: {{ block.settings.tooltip_padding }}px;
+    border-radius: {{ block.settings.tooltip_border_radius }}px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: {{ block.settings.tooltip_max_width }}px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);pointer-events: auto;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--top {
+    bottom: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--top.active {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--bottom {
+    top: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--bottom.active {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--left {
+    right: calc(100% + 15px);
+    top: 50%;
+    transform: translateY(-50%) translateX(10px);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--left.active {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--right {
+    left: calc(100% + 15px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--right.active {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--top::before {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);border-width: 8px 8px 0 8px;
+    border-color: {{ block.settings.tooltip_bg_color }} transparent transparent transparent;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--bottom::before {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 8px 8px 8px;
+    border-color: transparent transparent {{ block.settings.tooltip_bg_color }} transparent;
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--left::before {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 8px0 8px 8px;
+    border-color: transparent transparent transparent {{ block.settings.tooltip_bg_color }};
+  }
+
+  .ai-hotspot-tooltip-{{ ai_gen_id }}--right::before {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 8px 8px 8px 0;
+    border-color: transparent {{ block.settings.tooltip_bg_color }} transparent transparent;
+  }
+
+  .ai-hotspot-tooltip-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.tooltip_title_size }}px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+  }
+
+  .ai-hotspot-tooltip-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.tooltip_text_size }}px;
+    line-height: 1.4;
+    margin: 0;}
+
+  .ai-hotspot-tooltip-close-{{ ai_gen_id }} {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: {{ block.settings.tooltip_text_color }};
+    opacity: 0.7;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-hotspot-tooltip-close-{{ ai_gen_id }}:hover {
+    opacity: 1;background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hotspot-marker-{{ ai_gen_id }} {
+      width: {{ block.settings.hotspot_size | times: 0.8 }}px;
+      height: {{ block.settings.hotspot_size | times: 0.8 }}px;
+    }
+
+    .ai-hotspot-icon-{{ ai_gen_id }} {
+      width: calc({{ block.settings.hotspot_size | times: 0.8 }}px * 0.5);
+      height: calc({{ block.settings.hotspot_size | times: 0.8 }}px * 0.5);
+    }
+
+    .ai-hotspot-tooltip-{{ ai_gen_id }} {
+      max-width: {{ block.settings.tooltip_max_width | times: 0.8 }}px;
+      min-width: 160px;
+    }
+  }
+{% endstyle %}<image-hotspots-{{ ai_gen_id }}
+  class="ai-image-hotspot-container-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-image-hotspot-image-wrapper-{{ ai_gen_id }}">
+    {% if block.settings.image %}
+      <img
+        src="{{ block.settings.image | image_url: width: 2000 }}"
+        alt="{{ block.settings.image.alt | escape }}"
+        loading="lazy"
+        width="{{ block.settings.image.width }}"
+        height="{{ block.settings.image.height }}"
+        class="ai-image-hotspot-image-{{ ai_gen_id }}"
+      >
+    {% else %}
+      <div class="ai-image-hotspot-placeholder-{{ ai_gen_id }}">
+        {{ 'image' | placeholder_svg_tag }}
+      </div>
+    {% endif %}
+
+    {% for i in (1..5) %}
+      {% liquid
+        assign hotspot_enabled_key = 'hotspot_' | append: i | append: '_enabled'
+        assign hotspot_x_key = 'hotspot_' | append: i | append: '_x'
+        assign hotspot_y_key = 'hotspot_' | append: i | append: '_y'
+        assign hotspot_title_key = 'hotspot_' | append: i | append: '_title'
+        assign hotspot_description_key = 'hotspot_' | append: i | append: '_description'
+
+        assign hotspot_enabled = block.settings[hotspot_enabled_key]
+        assign hotspot_x = block.settings[hotspot_x_key]
+        assign hotspot_y = block.settings[hotspot_y_key]
+        assign hotspot_title = block.settings[hotspot_title_key]
+        assign hotspot_description = block.settings[hotspot_description_key]
+      %}
+
+      {% if hotspot_enabled %}
+        <div
+          class="ai-hotspot-point-{{ ai_gen_id }}"
+          style="--hotspot-x: {{ hotspot_x }}%; --hotspot-y: {{ hotspot_y }}%;"
+          data-hotspot-id="{{ i }}"
+        >
+          <div
+            class="ai-hotspot-marker-{{ ai_gen_id }}"
+            role="button"
+            tabindex="0"
+            aria-label="View hotspot {{ i }} details"
+            aria-expanded="false"
+          >
+            <svg
+              class="ai-hotspot-icon-{{ ai_gen_id }}"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+            </svg>
+          </div>
+
+          <div
+            class="ai-hotspot-tooltip-{{ ai_gen_id }} ai-hotspot-tooltip-{{ ai_gen_id }}--{{ block.settings.tooltip_position }}"
+            role="tooltip"
+            aria-hidden="true"
+          >
+            {% if hotspot_title != blank %}
+              <h3 class="ai-hotspot-tooltip-title-{{ ai_gen_id }}">{{ hotspot_title }}</h3>
+            {% endif %}
+            {% if hotspot_description != blank %}
+              <div class="ai-hotspot-tooltip-description-{{ ai_gen_id }}">{{ hotspot_description }}</div>
+            {% endif %}
+            <button
+              class="ai-hotspot-tooltip-close-{{ ai_gen_id }}"
+              aria-label="Close tooltip"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</image-hotspots-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ImageHotspots{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.activeTooltip = null;}
+
+      connectedCallback() {
+        this.hotspots = this.querySelectorAll('.ai-hotspot-point-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.hotspots.forEach((hotspot) => {
+          const marker = hotspot.querySelector('.ai-hotspot-marker-{{ ai_gen_id }}');
+          const tooltip = hotspot.querySelector('.ai-hotspot-tooltip-{{ ai_gen_id }}');
+          const closeButton = tooltip.querySelector('.ai-hotspot-tooltip-close-{{ ai_gen_id }}');
+
+          marker.addEventListener('click', () => {
+            this.toggleTooltip(hotspot, marker, tooltip);
+          });
+
+          marker.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.toggleTooltip(hotspot, marker, tooltip);
+            }
+          });
+
+          closeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.hideTooltip(marker, tooltip);
+          });
+        });document.addEventListener('click', (e) => {
+          if (!e.target.closest('.ai-hotspot-point-{{ ai_gen_id }}')) {
+            this.hideAllTooltips();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.hideAllTooltips();
+          }
+        });
+      }
+
+      toggleTooltip(hotspot, marker, tooltip) {
+        const isActive = tooltip.classList.contains('active');
+        
+        if (isActive) {
+          this.hideTooltip(marker, tooltip);
+        } else {
+          this.hideAllTooltips();
+          this.showTooltip(hotspot, marker, tooltip);
+        }
+      }
+
+      showTooltip(hotspot, marker, tooltip) {
+        this.adjustTooltipPosition(hotspot, tooltip);
+        tooltip.classList.add('active');
+        tooltip.setAttribute('aria-hidden', 'false');
+        marker.setAttribute('aria-expanded', 'true');
+        this.activeTooltip = tooltip;
+      }
+
+      hideTooltip(marker, tooltip) {
+        tooltip.classList.remove('active');
+        tooltip.setAttribute('aria-hidden', 'true');
+        marker.setAttribute('aria-expanded', 'false');
+        if (this.activeTooltip === tooltip) {
+          this.activeTooltip = null;
+        }
+      }
+
+      hideAllTooltips() {
+        this.hotspots.forEach((hotspot) => {
+          const marker = hotspot.querySelector('.ai-hotspot-marker-{{ ai_gen_id }}');
+          const tooltip = hotspot.querySelector('.ai-hotspot-tooltip-{{ ai_gen_id }}');
+          this.hideTooltip(marker, tooltip);
+        });
+      }
+
+      adjustTooltipPosition(hotspot, tooltip) {
+        const rect = this.getBoundingClientRect();
+        const hotspotRect = hotspot.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        const spaceTop = hotspotRect.top - rect.top;
+        const spaceBottom = rect.bottom - hotspotRect.bottom;
+        const spaceLeft = hotspotRect.left - rect.left;
+        const spaceRight = rect.right - hotspotRect.right;
+        
+        tooltip.className = tooltip.className.replace(/ai-hotspot-tooltip-{{ ai_gen_id }}--\w+/g, '');
+        
+        if (spaceTop > 150&& spaceTop > spaceBottom) {
+          tooltip.classList.add('ai-hotspot-tooltip-{{ ai_gen_id }}--top');
+        } else if (spaceBottom > 150) {
+          tooltip.classList.add('ai-hotspot-tooltip-{{ ai_gen_id }}--bottom');
+        } else if (spaceLeft > 250) {
+          tooltip.classList.add('ai-hotspot-tooltip-{{ ai_gen_id }}--left');
+        } else if (spaceRight > 250) {
+          tooltip.classList.add('ai-hotspot-tooltip-{{ ai_gen_id }}--right');
+        } else {
+          tooltip.classList.add('ai-hotspot-tooltip-{{ ai_gen_id }}--bottom');
+        }
+      }
+    }
+
+    customElements.define('image-hotspots-{{ ai_gen_id }}', ImageHotspots{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Image Hotspots",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot Style"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Hotspot size",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "hotspot_color",
+      "label": "Hotspot color",
+      "default": "#000f9f"
+    },
+    {
+      "type": "color",
+      "id": "hotspot_hover_color",
+      "label": "Hotspot hover color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "hotspot_icon_color",
+      "label": "Hotspot icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "hotspot_border_color",
+      "label": "Hotspot border color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Hotspot border width",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "hotspot_hover_scale",
+      "min": 1,
+      "max": 1.5,
+      "step": 0.1,
+      "label": "Hotspot hover scale",
+      "default": 1.2
+    },
+    {
+      "type": "header",
+      "content": "Tooltip Style"
+    },
+    {
+      "type": "select",
+      "id": "tooltip_position",
+      "label": "Default tooltip position",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "range",
+      "id": "tooltip_max_width",
+      "min": 200,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "label": "Tooltip max width",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "tooltip_padding",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Tooltip padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tooltip_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Tooltip border radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "tooltip_bg_color",
+      "label": "Tooltip background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "tooltip_text_color",
+      "label": "Tooltip text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "tooltip_title_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Tooltip title size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tooltip_text_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Tooltip text size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_1_enabled",
+      "label": "Enable hotspot 1",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_1_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "hotspot_1_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "hotspot_1_title",
+      "label": "Title",
+      "default": "Hotspot 1"
+    },
+    {
+      "type": "textarea",
+      "id": "hotspot_1_description",
+      "label": "Description",
+      "default": "This is the description for hotspot 1. Add any details you want to share about this point of interest."
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_2_enabled",
+      "label": "Enable hotspot 2",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_2_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "hotspot_2_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "hotspot_2_title",
+      "label": "Title",
+      "default": "Hotspot 2"
+    },
+    {
+      "type": "textarea",
+      "id": "hotspot_2_description",
+      "label": "Description",
+      "default": "This is the description for hotspot 2. Add any details you want to share about this point of interest."
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_3_enabled",
+      "label": "Enable hotspot 3",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_3_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "hotspot_3_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 75
+    },
+    {
+      "type": "text",
+      "id": "hotspot_3_title",
+      "label": "Title",
+      "default": "Hotspot 3"
+    },
+    {
+      "type": "textarea",
+      "id": "hotspot_3_description",
+      "label": "Description",
+      "default": "This is the description for hotspot 3. Add any details you want to share about this point of interest."
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_4_enabled",
+      "label": "Enable hotspot 4"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_4_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "hotspot_4_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 70
+    },
+    {
+      "type": "text",
+      "id": "hotspot_4_title",
+      "label": "Title",
+      "default": "Hotspot 4"
+    },
+    {
+      "type": "textarea",
+      "id": "hotspot_4_description",
+      "label": "Description",
+      "default": "This is the description for hotspot 4. Add any details you want to share about this point of interest."
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_5_enabled",
+      "label": "Enable hotspot 5"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_5_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "hotspot_5_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "hotspot_5_title",
+      "label": "Title",
+      "default": "Hotspot 5"
+    },
+    {
+      "type": "textarea",
+      "id": "hotspot_5_description",
+      "label": "Description",
+      "default": "This is the description for hotspot 5. Add any details you want to share about this point of interest."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Hotspots"
+    }
+  ]
+}
+{% endschema %}
