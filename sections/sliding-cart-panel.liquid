@@ -1,0 +1,532 @@
+{% comment %}
+  Renders modern sliding cart panel
+
+  Usage:
+  {% render 'sliding-cart-panel' %}
+{% endcomment %}
+
+{{ 'component-sliding-cart-panel.css' | asset_url | stylesheet_tag }}
+{{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'sliding-cart-panel.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  .sliding-cart-panel {
+    visibility: hidden;
+  }
+</style>
+
+<sliding-cart-panel class="sliding-cart-panel{% if cart == empty %} is-empty{% endif %}">
+  <div id="SlidingCartPanel" class="sliding-cart">
+    <div id="SlidingCartPanel-Overlay" class="sliding-cart__overlay"></div>
+    <div
+      class="sliding-cart__inner gradient color-{{ settings.sliding_cart_color_scheme | default: 'background-1' }}"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ 'sections.cart.title' | t }}"
+      tabindex="-1"
+    >
+      {%- if cart == empty -%}
+        <div class="sliding-cart__inner-empty">
+          <div class="sliding-cart__empty-content center">
+            <button
+              class="sliding-cart__close"
+              type="button"
+              onclick="this.closest('sliding-cart-panel').close()"
+              aria-label="{{ 'accessibility.close' | t }}"
+            >
+              <span class="sliding-cart__close-icon">
+                {{- 'icon-close.svg' | inline_asset_content -}}
+              </span>
+            </button>
+            <h2 class="sliding-cart__empty-text">{{ 'sections.cart.empty' | t }}</h2>
+            <a href="{{ routes.all_products_collection_url }}" class="button">
+              {{ 'general.continue_shopping' | t }}
+            </a>
+          </div>
+        </div>
+      {%- else -%}
+        <!-- Cart Header with Tabs -->
+        <div class="sliding-cart__header">
+          <div class="sliding-cart__tabs">
+            <button class="sliding-cart__tab sliding-cart__tab--active" data-tab="cart">
+              {{ 'sections.cart.title' | t }}
+              <span class="sliding-cart__cart-count">{{ cart.item_count }}</span>
+            </button>
+            {%- if section.settings.show_recently_viewed -%}
+              <button class="sliding-cart__tab" data-tab="recently-viewed">
+                {{ section.settings.recently_viewed_text | default: 'Recently viewed' }}
+              </button>
+            {%- endif -%}
+          </div>
+          <button
+            class="sliding-cart__close"
+            type="button"
+            onclick="this.closest('sliding-cart-panel').close()"
+            aria-label="{{ 'accessibility.close' | t }}"
+          >
+            <span class="sliding-cart__close-icon">
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </span>
+          </button>
+        </div>
+
+        <!-- Cart Content -->
+        <div class="sliding-cart__content">
+          <!-- Cart Tab Content -->
+          <div class="sliding-cart__tab-content sliding-cart__tab-content--active" data-tab-content="cart">
+            <sliding-cart-items>
+              <form
+                action="javascript:void(0)"
+                id="SlidingCartPanel-Form"
+                class="sliding-cart__form"
+                method="post"
+              >
+                <div id="SlidingCartPanel-CartItems" class="sliding-cart__items">
+                  {%- if cart != empty -%}
+                    <div class="sliding-cart__items-wrapper">
+                      {%- for item in cart.items -%}
+                        <div class="sliding-cart__item" data-variant-id="{{ item.variant.id }}">
+                          <!-- Product Image -->
+                          <div class="sliding-cart__item-image">
+                            {% if item.image %}
+                              <a href="{{ item.url }}" class="sliding-cart__item-link" tabindex="-1" aria-hidden="true">
+                                <img
+                                  src="{{ item.image | image_url: width: 120 }}"
+                                  alt="{{ item.image.alt | escape }}"
+                                  loading="lazy"
+                                  width="60"
+                                  height="{{ 60 | divided_by: item.image.aspect_ratio | ceil }}"
+                                >
+                              </a>
+                            {% endif %}
+                          </div>
+
+                          <!-- Product Details -->
+                          <div class="sliding-cart__item-details">
+                            <a href="{{ item.url }}" class="sliding-cart__item-title">
+                              {{ item.product.title | escape }}
+                            </a>
+                            
+                            {%- if item.product.has_only_default_variant == false -%}
+                              <div class="sliding-cart__item-variant">
+                                {%- for option in item.options_with_values -%}
+                                  {{ option.value }}{% unless forloop.last %} / {% endunless %}
+                                {%- endfor -%}
+                              </div>
+                            {%- endif -%}
+
+                            <div class="sliding-cart__item-price">
+                              {%- if item.original_price != item.final_price -%}
+                                <s class="sliding-cart__item-old-price">{{ item.original_price | money }}</s>
+                                <span class="sliding-cart__item-final-price">{{ item.final_price | money }}</span>
+                              {%- else -%}
+                                <span>{{ item.original_price | money }}</span>
+                              {%- endif -%}
+                            </div>
+
+                            <!-- Quantity Controls -->
+                            <div class="sliding-cart__item-quantity">
+                              <quantity-input class="quantity sliding-cart-quantity">
+                                <button class="quantity__button quantity__button--minus" name="minus" type="button">
+                                  <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: item.product.title | escape }}</span>
+                                  <span class="sliding-cart__quantity-icon">
+                                    {{- 'icon-minus.svg' | inline_asset_content -}}
+                                  </span>
+                                </button>
+                                <input
+                                  class="quantity__input"
+                                  type="number"
+                                  data-quantity-variant-id="{{ item.variant.id }}"
+                                  name="updates[]"
+                                  value="{{ item.quantity }}"
+                                  data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                                  min="0"
+                                  data-min="{{ item.variant.quantity_rule.min }}"
+                                  {% if item.variant.quantity_rule.max != null %}
+                                    max="{{ item.variant.quantity_rule.max }}"
+                                  {% endif %}
+                                  step="{{ item.variant.quantity_rule.increment }}"
+                                  aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                                  id="SlidingCart-quantity-{{ item.index | plus: 1 }}"
+                                  data-index="{{ item.index | plus: 1 }}"
+                                >
+                                <button class="quantity__button quantity__button--plus" name="plus" type="button">
+                                  <span class="visually-hidden">{{ 'products.product.quantity.increase' | t: product: item.product.title | escape }}</span>
+                                  <span class="sliding-cart__quantity-icon">
+                                    {{- 'icon-plus.svg' | inline_asset_content -}}
+                                  </span>
+                                </button>
+                              </quantity-input>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <div class="sliding-cart__remove">
+                              <button
+                                type="button"
+                                class="sliding-cart__remove-button"
+                                aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+                                data-variant-id="{{ item.variant.id }}"
+                                data-index="{{ item.index | plus: 1 }}"
+                                onclick="this.closest('sliding-cart-panel').removeCartItem('{{ item.variant.id }}')"
+                              >
+                                {{ section.settings.remove_text | default: 'Remove' }}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <!-- Gift Wrapping Option -->
+                {%- if section.settings.show_gift_wrapping -%}
+                  <div class="sliding-cart__gift-wrap">
+                    <label class="sliding-cart__gift-wrap-label">
+                      <input type="checkbox" class="sliding-cart__gift-wrap-checkbox" name="attributes[gift_wrap]" value="yes">
+                      {{ section.settings.gift_wrap_text | default: 'For Rs. 900.00, please wrap the products in this order.' }}
+                    </label>
+                  </div>
+                {%- endif -%}
+
+                <!-- Service Icons -->
+                {%- if section.settings.show_service_icons -%}
+                  <div class="sliding-cart__services">
+                    <button type="button" class="sliding-cart__service sliding-cart__service--button" onclick="this.closest('sliding-cart-panel').openOrderNote()">
+                      <span class="sliding-cart__service-icon">
+                        {{- 'icon-cart.svg' | inline_asset_content -}}
+                      </span>
+                      <span class="sliding-cart__service-text">{{ section.settings.order_note_text | default: 'Order note' }}</span>
+                    </button>
+                    <button type="button" class="sliding-cart__service sliding-cart__service--button" onclick="this.closest('sliding-cart-panel').openShippingChecker()">
+                      <span class="sliding-cart__service-icon">
+                        {{- 'icon-truck.svg' | inline_asset_content -}}
+                      </span>
+                      <span class="sliding-cart__service-text">{{ section.settings.shipping_text | default: 'Shipping' }}</span>
+                    </button>
+                    <button type="button" class="sliding-cart__service sliding-cart__service--button" onclick="this.closest('sliding-cart-panel').openDiscountList()">
+                      <span class="sliding-cart__service-icon">
+                        {{- 'icon-discount.svg' | inline_asset_content -}}
+                      </span>
+                      <span class="sliding-cart__service-text">{{ section.settings.discount_text | default: 'Discount' }}</span>
+                    </button>
+                  </div>
+
+                  <!-- Order Note Modal -->
+                  <div class="sliding-cart__modal" id="order-note-modal" style="display: none;">
+                    <div class="sliding-cart__modal-content">
+                      <div class="sliding-cart__modal-header">
+                        <h3 class="sliding-cart__modal-title">{{ section.settings.order_note_title | default: 'Add Order Note' }}</h3>
+                        <button type="button" class="sliding-cart__modal-close" onclick="this.closest('.sliding-cart__modal').style.display='none'">
+                          {{- 'icon-close.svg' | inline_asset_content -}}
+                        </button>
+                      </div>
+                      <div class="sliding-cart__modal-body">
+                        <textarea 
+                          class="sliding-cart__order-note-input" 
+                          name="note" 
+                          placeholder="{{ section.settings.order_note_placeholder | default: 'Special instructions for your order...' }}"
+                          rows="4"
+                        >{{ cart.note }}</textarea>
+                        <button type="button" class="sliding-cart__modal-save" onclick="this.closest('sliding-cart-panel').saveOrderNote()">
+                          {{ section.settings.save_note_text | default: 'Save Note' }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Shipping Checker Modal -->
+                  <div class="sliding-cart__modal" id="shipping-modal" style="display: none;">
+                    <div class="sliding-cart__modal-content">
+                      <div class="sliding-cart__modal-header">
+                        <h3 class="sliding-cart__modal-title">{{ section.settings.shipping_title | default: 'Check Shipping' }}</h3>
+                        <button type="button" class="sliding-cart__modal-close" onclick="this.closest('.sliding-cart__modal').style.display='none'">
+                          {{- 'icon-close.svg' | inline_asset_content -}}
+                        </button>
+                      </div>
+                      <div class="sliding-cart__modal-body">
+                        <div class="sliding-cart__shipping-form">
+                          <input 
+                            type="text" 
+                            class="sliding-cart__zipcode-input" 
+                            placeholder="{{ section.settings.zipcode_placeholder | default: 'Enter ZIP code' }}"
+                            maxlength="10"
+                          >
+                          <button type="button" class="sliding-cart__check-shipping" onclick="this.closest('sliding-cart-panel').checkShipping()">
+                            {{ section.settings.check_shipping_text | default: 'Check' }}
+                          </button>
+                        </div>
+                        <div class="sliding-cart__shipping-result" id="shipping-result"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Discount List Modal -->
+                  <div class="sliding-cart__modal" id="discount-modal" style="display: none;">
+                    <div class="sliding-cart__modal-content">
+                      <div class="sliding-cart__modal-header">
+                        <h3 class="sliding-cart__modal-title">{{ section.settings.discount_title | default: 'Available Discounts' }}</h3>
+                        <button type="button" class="sliding-cart__modal-close" onclick="this.closest('.sliding-cart__modal').style.display='none'">
+                          {{- 'icon-close.svg' | inline_asset_content -}}
+                        </button>
+                      </div>
+                      <div class="sliding-cart__modal-body">
+                        <div class="sliding-cart__discount-input">
+                          <input 
+                            type="text" 
+                            class="sliding-cart__discount-code-input" 
+                            placeholder="{{ section.settings.discount_placeholder | default: 'Enter discount code' }}"
+                          >
+                          <button type="button" class="sliding-cart__apply-discount" onclick="this.closest('sliding-cart-panel').applyDiscount()">
+                            {{ section.settings.apply_discount_text | default: 'Apply' }}
+                          </button>
+                        </div>
+                        <div class="sliding-cart__discount-list" id="discount-list">
+                          <!-- Available discounts will be populated here -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {%- endif -%}
+
+                <!-- Price Summary -->
+                <div class="sliding-cart__summary">
+                  <div class="sliding-cart__summary-row">
+                    <span class="sliding-cart__summary-label">{{ section.settings.taxes_text | default: 'Taxes included and shipping calculated at checkout.' }}</span>
+                    <div class="sliding-cart__summary-total">
+                      <span class="sliding-cart__summary-label">{{ 'sections.cart.estimated_total' | t }}</span>
+                      <span class="sliding-cart__summary-price">{{ cart.total_price | money }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checkout Button -->
+                <div class="sliding-cart__checkout">
+                  <button
+                    type="submit"
+                    id="SlidingCartPanel-Checkout"
+                    class="sliding-cart__checkout-button button"
+                    name="checkout"
+                    form="SlidingCartPanel-Form"
+                    {% if cart == empty %}disabled{% endif %}
+                  >
+                    <span class="sliding-cart__checkout-icon">
+                      {{- 'icon-lock.svg' | inline_asset_content -}}
+                    </span>
+                    {{ section.settings.checkout_text | default: 'Check out' }}
+                  </button>
+                </div>
+              </form>
+            </sliding-cart-items>
+          </div>
+
+          <!-- Recently Viewed Tab Content -->
+          {%- if section.settings.show_recently_viewed -%}
+            <div class="sliding-cart__tab-content" data-tab-content="recently-viewed">
+              <div class="sliding-cart__recently-viewed" id="SlidingCart-RecentlyViewed">
+                <!-- Recently viewed products will be populated by JavaScript -->
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</sliding-cart-panel>
+
+{% schema %}
+{
+  "name": "Sliding Cart Panel",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "sliding_cart_color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "Features"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_recently_viewed",
+      "label": "Show recently viewed tab",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "recently_viewed_text",
+      "label": "Recently viewed tab text",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_gift_wrapping",
+      "label": "Show gift wrapping option",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "gift_wrap_text",
+      "label": "Gift wrap text",
+      "default": "For Rs. 900.00, please wrap the products in this order."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_service_icons",
+      "label": "Show service icons",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Text customization"
+    },
+    {
+      "type": "text",
+      "id": "order_note_text",
+      "label": "Order note text",
+      "default": "Order note"
+    },
+    {
+      "type": "text",
+      "id": "shipping_text",
+      "label": "Shipping text",
+      "default": "Shipping"
+    },
+    {
+      "type": "text",
+      "id": "discount_text",
+      "label": "Discount text",
+      "default": "Discount"
+    },
+    {
+      "type": "header",
+      "content": "Modal Settings"
+    },
+    {
+      "type": "text",
+      "id": "order_note_title",
+      "label": "Order note modal title",
+      "default": "Add Order Note"
+    },
+    {
+      "type": "text",
+      "id": "order_note_placeholder",
+      "label": "Order note placeholder",
+      "default": "Special instructions for your order..."
+    },
+    {
+      "type": "text",
+      "id": "save_note_text",
+      "label": "Save note button text",
+      "default": "Save Note"
+    },
+    {
+      "type": "text",
+      "id": "shipping_title",
+      "label": "Shipping modal title",
+      "default": "Check Shipping"
+    },
+    {
+      "type": "text",
+      "id": "zipcode_placeholder",
+      "label": "ZIP code placeholder",
+      "default": "Enter ZIP code"
+    },
+    {
+      "type": "text",
+      "id": "check_shipping_text",
+      "label": "Check shipping button text",
+      "default": "Check"
+    },
+    {
+      "type": "text",
+      "id": "discount_title",
+      "label": "Discount modal title",
+      "default": "Available Discounts"
+    },
+    {
+      "type": "text",
+      "id": "discount_placeholder",
+      "label": "Discount code placeholder",
+      "default": "Enter discount code"
+    },
+    {
+      "type": "text",
+      "id": "apply_discount_text",
+      "label": "Apply discount button text",
+      "default": "Apply"
+    },
+    {
+      "type": "text",
+      "id": "remove_text",
+      "label": "Remove button text",
+      "default": "Remove"
+    },
+    {
+      "type": "text",
+      "id": "checkout_text",
+      "label": "Checkout button text",
+      "default": "Check out"
+    },
+    {
+      "type": "text",
+      "id": "taxes_text",
+      "label": "Taxes and shipping text",
+      "default": "Taxes included and shipping calculated at checkout."
+    },
+    {
+      "type": "header",
+      "content": "Animation settings"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "unit": "ms",
+      "label": "Animation duration",
+      "default": 300
+    },
+    {
+      "type": "select",
+      "id": "animation_ease",
+      "label": "Animation easing",
+      "options": [
+        {
+          "value": "ease",
+          "label": "Ease"
+        },
+        {
+          "value": "ease-in",
+          "label": "Ease in"
+        },
+        {
+          "value": "ease-out",
+          "label": "Ease out"
+        },
+        {
+          "value": "ease-in-out",
+          "label": "Ease in out"
+        },
+        {
+          "value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+          "label": "Material Design"
+        }
+      ],
+      "default": "cubic-bezier(0.4, 0.0, 0.2, 1)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sliding Cart Panel"
+    }
+  ]
+}
+{% endschema %}

@@ -36,13 +36,14 @@
       </div>
       <div id="cart-notification-product" class="cart-notification-product"></div>
       <div class="cart-notification__links">
-        <a
-          href="{{ routes.cart_url }}"
+        <button
+          type="button"
           id="cart-notification-button"
           class="button button--secondary button--full-width"
+          onclick="document.querySelector('sliding-cart-panel').open(this)"
         >
           {{- 'general.cart.view_empty_cart' | t -}}
-        </a>
+        </button>
         <form action="{{ routes.cart_url }}" method="post" id="cart-notification-form">
           <button class="button button--primary button--full-width" name="checkout">
             {{ 'sections.cart.checkout' | t }}

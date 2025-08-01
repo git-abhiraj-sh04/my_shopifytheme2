@@ -1,0 +1,130 @@
+/* Discount Ribbon Component */
+.discount-ribbon {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  background: rgb(var(--color-error));
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 0;
+  text-align: center;
+  transform: rotate(-5deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 4rem;
+  line-height: 1.2;
+}
+
+.discount-ribbon::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 0.4rem solid transparent;
+  border-right: 0.4rem solid rgba(var(--color-error), 0.8);
+  border-top: 0.4rem solid rgba(var(--color-error), 0.8);
+}
+
+.discount-ribbon::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-left: 0.4rem solid rgba(var(--color-error), 0.8);
+  border-right: 0.4rem solid transparent;
+  border-top: 0.4rem solid rgba(var(--color-error), 0.8);
+}
+
+/* Card media positioning for ribbon */
+.card__media {
+  position: relative;
+}
+
+/* Price styling improvements */
+.price--on-sale .price__regular {
+  display: none;
+}
+
+.price--on-sale .price__sale {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.price--on-sale .price-item--regular {
+  color: rgba(var(--color-foreground), 0.6);
+  text-decoration: line-through;
+  font-size: 0.9em;
+}
+
+.price--on-sale .price-item--sale {
+  color: rgb(var(--color-error));
+  font-weight: bold;
+}
+
+/* Ensure sale pricing is always visible */
+.price__sale {
+  display: flex !important;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Product card discount styling */
+.card-product-discount {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.card-product-discount .price-original {
+  color: rgba(var(--color-foreground), 0.6);
+  text-decoration: line-through;
+  font-size: 0.9em;
+}
+
+.card-product-discount .price-sale {
+  color: rgb(var(--color-error));
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 749px) {
+  .discount-ribbon {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 1rem;
+    min-width: 3rem;
+  }
+}
+
+/* Animation for ribbon */
+@media (prefers-reduced-motion: no-preference) {
+  .discount-ribbon {
+    animation: ribbon-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes ribbon-pulse {
+    0%, 100% {
+      transform: rotate(-5deg) scale(1);
+    }
+    50% {
+      transform: rotate(-5deg) scale(1.05);
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .discount-ribbon {
+    border: 2px solid white;
+  }
+}

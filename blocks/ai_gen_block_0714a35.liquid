@@ -99,8 +99,8 @@
     width: calc({{ block.settings.hotspot_size }}px * 0.5);
     height: calc({{ block.settings.hotspot_size }}px * 0.5);
     color: {{ block.settings.hotspot_icon_color }};
-    z-index: 1;
-    position: relative;
+    pointer-events: none;
+    fill: currentColor;
   }
 
   .ai-hotspot-tooltip-{{ ai_gen_id }} {

@@ -133,12 +133,13 @@
         <div class="quick-order-list-total__info">
           <div class="quick-order-list-total__column small-hide medium-hide">
             <div class="quick-order-list-buttons">
-              <a
-                href="{{ routes.cart_url }} "
+              <button
+                type="button"
                 class="quick-order-list__button button button--secondary small-hide  medium-hide"
+                onclick="document.querySelector('sliding-cart-panel').open(this)"
               >
                 <span class="quick-order-list__button-text">{{- 'sections.quick_order_list.view_cart' | t -}}</span>
-              </a>
+              </button>
               <div class="variant-remove-total{% if items_in_cart == 0 %} variant-remove-total--empty{% endif %}">
                 {%- render 'loading-spinner' -%}
                 <quick-order-list-remove-all-button
@@ -224,12 +225,13 @@
           </div>
           <div class="quick-order-list-total__column large-up-hide">
             <div class="quick-order-list-buttons">
-              <a
-                href="{{ routes.cart_url }}"
+              <button
+                type="button"
                 class="quick-order-list__button button button--secondary button--full-width"
+                onclick="document.querySelector('sliding-cart-panel').open(this)"
               >
                 <span class="quick-order-list__button-text">{{- 'sections.quick_order_list.view_cart' | t -}}</span>
-              </a>
+              </button>
               <div class="variant-remove-total">
                 {%- render 'loading-spinner' -%}
                 <quick-order-list-remove-all-button
