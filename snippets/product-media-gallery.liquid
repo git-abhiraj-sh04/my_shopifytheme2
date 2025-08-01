@@ -52,16 +52,6 @@
   data-desktop-layout="{{ section.settings.gallery_layout }}"
   style="position: relative;"
 >
-  {%- comment -%} Product Discount Ribbon {%- endcomment -%}
-  {%- if product.compare_at_price > product.price and product.available -%}
-    {%- liquid
-      assign discount_amount = product.compare_at_price | minus: product.price
-      assign discount_percentage = discount_amount | times: 100 | divided_by: product.compare_at_price | round
-    -%}
-    <div class="discount-ribbon">
-      {{ discount_percentage }}% OFF
-    </div>
-  {%- endif -%}
   <div id="GalleryStatus-{{ section.id }}" class="visually-hidden" role="status"></div>
   <slider-component id="GalleryViewer-{{ section.id }}" class="slider-mobile-gutter">
     <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">

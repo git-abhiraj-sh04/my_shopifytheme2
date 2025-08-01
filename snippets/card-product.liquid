@@ -23,7 +23,6 @@
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
   {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
-  {{ 'component-discount-ribbon.css' | asset_url | stylesheet_tag }}
 
   {{ 'component-price.css' | asset_url | stylesheet_tag }}
   {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
@@ -105,17 +104,6 @@
                 >
               {%- endif -%}
             </div>
-            
-            {%- comment -%} Discount Ribbon {%- endcomment -%}
-            {%- if card_product.compare_at_price > card_product.price and card_product.available -%}
-              {%- liquid
-                assign discount_amount = card_product.compare_at_price | minus: card_product.price
-                assign discount_percentage = discount_amount | times: 100 | divided_by: card_product.compare_at_price | round
-              -%}
-              <div class="discount-ribbon">
-                {{ discount_percentage }}% OFF
-              </div>
-            {%- endif -%}
           </div>
         {%- endif -%}
         <div class="card__content">
