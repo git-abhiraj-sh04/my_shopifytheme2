@@ -1,4 +1,5 @@
 {{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
+{{ 'component-blob-button.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -63,28 +64,42 @@
                 {% endif %}
               >
                 {%- if block.settings.button_label != blank -%}
-                  <a
-                    {% if block.settings.button_link == blank %}
-                      role="link" aria-disabled="true"
-                    {% else %}
-                      href="{{ block.settings.button_link }}"
-                    {% endif %}
-                    class="button{% if block.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
-                  >
-                    {{- block.settings.button_label | escape -}}
-                  </a>
+                  {%- assign button_text = block.settings.button_label | downcase -%}
+                  {%- if button_text contains 'start shopping' -%}
+                    {%- render 'blob-button', 
+                        button_text: block.settings.button_label, 
+                        button_url: block.settings.button_link -%}
+                  {%- else -%}
+                    <a
+                      {% if block.settings.button_link == blank %}
+                        role="link" aria-disabled="true"
+                      {% else %}
+                        href="{{ block.settings.button_link }}"
+                      {% endif %}
+                      class="button{% if block.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
+                    >
+                      {{- block.settings.button_label | escape -}}
+                    </a>
+                  {%- endif -%}
                 {%- endif -%}
                 {%- if block.settings.button_label_2 != blank -%}
-                  <a
-                    {% if block.settings.button_link_2 == blank %}
-                      role="link" aria-disabled="true"
-                    {% else %}
-                      href="{{ block.settings.button_link_2 }}"
-                    {% endif %}
-                    class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}"
-                  >
-                    {{- block.settings.button_label_2 | escape -}}
-                  </a>
+                  {%- assign button_text_2 = block.settings.button_label_2 | downcase -%}
+                  {%- if button_text_2 contains 'start shopping' -%}
+                    {%- render 'blob-button', 
+                        button_text: block.settings.button_label_2, 
+                        button_url: block.settings.button_link_2 -%}
+                  {%- else -%}
+                    <a
+                      {% if block.settings.button_link_2 == blank %}
+                        role="link" aria-disabled="true"
+                      {% else %}
+                        href="{{ block.settings.button_link_2 }}"
+                      {% endif %}
+                      class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}"
+                    >
+                      {{- block.settings.button_label_2 | escape -}}
+                    </a>
+                  {%- endif -%}
                 {%- endif -%}
               </div>
           {%- endcase -%}

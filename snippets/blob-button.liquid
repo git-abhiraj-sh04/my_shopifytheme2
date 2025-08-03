@@ -1,0 +1,42 @@
+{% comment %}
+  Blob Button Component
+  
+  Parameters:
+  - button_text: The text to display on the button
+  - button_url: The URL the button should link to
+  - button_class: Additional CSS classes (optional)
+  - button_id: Button ID (optional)
+  
+  Usage:
+  {% render 'blob-button', button_text: 'Click Me', button_url: '/collections/all' %}
+{% endcomment %}
+
+{% assign button_text = button_text | default: 'Button' %}
+{% assign button_url = button_url | default: '#' %}
+{% assign button_class = button_class | default: '' %}
+
+{% if button_url == blank or button_url == '#' %}
+  <button class="blob-btn {{ button_class }}"{% if button_id %} id="{{ button_id }}"{% endif %}>
+    {{ button_text }}
+    <span class="blob-btn__inner">
+      <span class="blob-btn__blobs">
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+      </span>
+    </span>
+  </button>
+{% else %}
+  <a href="{{ button_url }}" class="blob-btn {{ button_class }}"{% if button_id %} id="{{ button_id }}"{% endif %}>
+    {{ button_text }}
+    <span class="blob-btn__inner">
+      <span class="blob-btn__blobs">
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+        <span class="blob-btn__blob"></span>
+      </span>
+    </span>
+  </a>
+{% endif %}
