@@ -2355,8 +2355,8 @@ input[type='checkbox'] {
 }
 
 .scrolled-past-header .header-wrapper {
-  background-color: #f6f0eb;
-  transition: background-color 0.3s ease;
+  background-color: #e1d0c8;
+  transition: background-color 1s ease;
 }
 
 .header {
@@ -3001,7 +3001,7 @@ details-disclosure > details {
 /* Navbar transforms on scroll */
 .scrolled-past-header .header-wrapper {
   position: fixed;
-  background: #f0f4f8 !important;
+  background: #e1d0c8 !important;
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 16px 0 rgba(0,0,0,0.1);
 }

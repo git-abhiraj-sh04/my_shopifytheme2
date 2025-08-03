@@ -1,0 +1,170 @@
+/* Navbar Blob Effect - Dusty Rose Theme */
+
+/* Hide blob effect by default - ONLY show on scroll */
+.navbar-blob-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  overflow: hidden;
+  z-index: 5;
+}
+
+/* Show blob effect ONLY when scrolled past header */
+.scrolled-past-header .navbar-blob-container {
+  opacity: 1;
+}
+
+/* Blob animation container - simplified for testing */
+.navbar-blob-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* filter: blur(3px) contrast(8); - TEMPORARILY DISABLED */
+}
+
+/* Individual blob elements - back to dusty rose */
+.navbar-blob {
+  position: absolute;
+  background-color: #D4A5A5; /* Dusty rose color */
+  border-radius: 50%;
+  animation: navbar-blob-float 6s ease-in-out infinite;
+  z-index: 6;
+}
+
+/* Blob sizes and positions */
+.navbar-blob:nth-child(1) {
+  width: 60px;
+  height: 60px;
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 7s;
+}
+
+.navbar-blob:nth-child(2) {
+  width: 80px;
+  height: 80px;
+  left: 30%;
+  animation-delay: -2s;
+  animation-duration: 8s;
+}
+
+.navbar-blob:nth-child(3) {
+  width: 45px;
+  height: 45px;
+  left: 50%;
+  animation-delay: -4s;
+  animation-duration: 6s;
+}
+
+.navbar-blob:nth-child(4) {
+  width: 70px;
+  height: 70px;
+  left: 70%;
+  animation-delay: -1s;
+  animation-duration: 9s;
+}
+
+.navbar-blob:nth-child(5) {
+  width: 55px;
+  height: 55px;
+  left: 85%;
+  animation-delay: -3s;
+  animation-duration: 7.5s;
+}
+
+/* Floating animation keyframes */
+@keyframes navbar-blob-float {
+  0%, 100% {
+    transform: translateY(80px) scale(0.9);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-15px) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(5px) scale(0.95);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(-25px) scale(1.15);
+    opacity: 0.95;
+  }
+}
+
+/* Enhanced navbar background when scrolled */
+.scrolled-past-header .header-wrapper {
+  background: rgba(240, 244, 248, 0.85) !important;
+  backdrop-filter: blur(12px);
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure text and navigation stay above blobs */
+.scrolled-past-header .header {
+  position: relative;
+  z-index: 10;
+}
+
+/* All navbar content above blobs */
+.header__heading,
+.header__heading-link,
+.header__menu,
+.header__icons {
+  position: relative;
+  z-index: 10;
+}
+
+/* Mobile adjustments */
+@media screen and (max-width: 749px) {
+  .navbar-blob {
+    animation-duration: 5s;
+  }
+  
+  .navbar-blob:nth-child(1),
+  .navbar-blob:nth-child(3),
+  .navbar-blob:nth-child(5) {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .navbar-blob:nth-child(2),
+  .navbar-blob:nth-child(4) {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Performance optimizations */
+.navbar-blob-wrapper {
+  will-change: filter;
+  transform: translateZ(0);
+}
+
+.navbar-blob {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-blob {
+    animation: none;
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  
+  .navbar-blob-container {
+    transition: none;
+  }
+  
+  .scrolled-past-header .header-wrapper {
+    transition: background-color 0.2s ease;
+  }
+}

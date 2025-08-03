@@ -90,7 +90,7 @@
     margin: calc(-{{ block.settings.hotspot_size }}px) 0 0 calc(-{{ block.settings.hotspot_size }}px);
     transform-origin: 50% 50%;
     border-radius: 50%;
-    border: 1px solid {{ block.settings.ring_color }};
+    border: 2px solid {{ block.settings.ring_color }};
     opacity: 0;
     animation: ai-hotspot-pulsate-{{ ai_gen_id }} 3s ease-out infinite;
   }
@@ -102,8 +102,8 @@
     width: {{ block.settings.hotspot_size }}px;
     height: {{ block.settings.hotspot_size }}px;
     margin: calc(-{{ block.settings.hotspot_size | divided_by: 2 }}px) 0 0 calc(-{{ block.settings.hotspot_size | divided_by: 2 }}px);
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    background-color: #cf0404 ;
+    border: 2px solid #cf0404;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -118,7 +118,7 @@
   .ai-hotspot-marker-{{ ai_gen_id }}:hover .ai-hotspot-circle-{{ ai_gen_id }} {
     opacity: 0.8;
     transform: scale(1.1);
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: #e1d0c8;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   }
 
@@ -489,7 +489,7 @@
       "type": "color",
       "id": "ring_color",
       "label": "Pulsating ring color",
-      "default": "#ed0048"
+      "default": "#cf0404"
     },
     {
       "type": "range",
