@@ -1,0 +1,672 @@
+{% doc %}
+  @prompt
+    Create a professional glassmorphism newsletter popup section for Shopify Dawn theme with advanced animations and enterprise functionality.
+    
+    GLASSMORPHISM DESIGN:
+    - Glass panel: background rgba(255,255,255,0.15) with backdrop-filter blur(20px)
+    - Gradient borders and 25px box-shadow for depth
+    - Animated 3-color gradient background (8s infinite cycle)
+    - Floating particle system with organic drift animations
+    - Minimalist typography with Golden ratio spacing
+    - Mobile-responsive with proper breakpoints
+    
+    BACKGROUND BLUR EFFECT:
+    - When popup opens: Apply backdrop-filter blur(8px) to entire website background
+    - Smooth transition: 0.4s ease for professional fade-in/out effect
+    - Overlay with rgba(0,0,0,0.4) to darken background slightly
+    - Focus enhancement: Makes popup stand out dramatically
+    - Remove blur smoothly when popup closes for seamless experience
+    
+    CRITICAL INPUT REQUIREMENTS:
+    - Email input with PERSISTENT stable cursor (no disappearing issues)
+    - Must work flawlessly for typing, editing, backspacing, text selection
+    - Required CSS: caret-color: #333 !important, z-index: 10, cursor: text !important
+    - Floating label that animates without interfering with cursor functionality
+    - Input must behave like professional web applications (Gmail/Stripe quality)
+    
+    PROFESSIONAL BUTTON ANIMATIONS:
+    - Subscribe button: Liquid paint fill from left to right on hover (0.6s)
+    - Add ripple effect on click expanding from touch point
+    - Close button: 360° spin when clicked with elastic timing
+    - All animations: 60fps using transform3d, cubic-bezier easing curves
+    - Hover effects: 3px lift, scale 1.02, enhanced shadows
+    
+    CRITICAL FUNCTIONALITY:
+    - Close button click: Set permanent cookie, never show popup again
+    - Successful subscription: Set permanent cookie, never show popup again
+    - Both actions must use identical cookie management system
+    - Form submission detection with proper success/error handling
+    - Cookie duration configurable in theme settings
+    
+    SHOPIFY INTEGRATION:
+    - Theme customizer: colors, te
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-newsletter-popup-overlay-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+  }
+
+  .ai-newsletter-popup-overlay-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-newsletter-popup-background-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      45deg,
+      {{ block.settings.gradient_color_1 }},
+      {{ block.settings.gradient_color_2 }},
+      {{ block.settings.gradient_color_3 }}
+    );
+    background-size: 400% 400%;
+    animation: ai-gradient-shift-{{ ai_gen_id }} 8s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes ai-gradient-shift-{{ ai_gen_id }} {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .ai-newsletter-popup-particles-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .ai-newsletter-popup-particle-{{ ai_gen_id }} {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: ai-particle-float-{{ ai_gen_id }} 6s ease-in-out infinite;
+  }
+
+  @keyframes ai-particle-float-{{ ai_gen_id }} {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    33% { transform: translateY(-20px) translateX(10px); }
+    66% { transform: translateY(10px) translateX(-15px); }
+  }
+
+  .ai-newsletter-popup-container-{{ ai_gen_id }} {
+    position: relative;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .ai-newsletter-popup-overlay-{{ ai_gen_id }}.active .ai-newsletter-popup-container-{{ ai_gen_id }} {
+    transform: scale(1) translateY(0);}
+
+  .ai-newsletter-popup-close-{{ ai_gen_id }} {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: {{ block.settings.text_color }};
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .ai-newsletter-popup-close-{{ ai_gen_id }}:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+  }
+
+  .ai-newsletter-popup-close-{{ ai_gen_id }}.spinning {
+    animation: ai-spin-close-{{ ai_gen_id }} 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes ai-spin-close-{{ ai_gen_id }} {
+    0% { transform: rotate(0deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1.1); }
+  }
+
+  .ai-newsletter-popup-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 16px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .ai-newsletter-popup-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 32px;
+    opacity: 0.9;
+    line-height: 1.6;
+  }
+
+  .ai-newsletter-popup-form-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-newsletter-popup-input-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .ai-newsletter-popup-input-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    color: {{ block.settings.text_color }};
+    font-size: 16px;
+    transition: all 0.3s ease;
+    caret-color: #333 !important;
+    z-index: 10;
+    cursor: text !important;box-sizing: border-box;
+  }
+
+  .ai-newsletter-popup-input-{{ ai_gen_id }}:focus {
+    outline: none;
+    border-color: {{ block.settings.accent_color }};
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-newsletter-popup-input-{{ ai_gen_id }}::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+  }
+
+  .ai-newsletter-popup-input-{{ ai_gen_id }}:focus::placeholder {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  .ai-newsletter-popup-label-{{ ai_gen_id }} {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 5;
+  }
+
+  .ai-newsletter-popup-input-{{ ai_gen_id }}:focus + .ai-newsletter-popup-label-{{ ai_gen_id }},
+  .ai-newsletter-popup-input-{{ ai_gen_id }}:not(:placeholder-shown) + .ai-newsletter-popup-label-{{ ai_gen_id }} {
+    top: -8px;
+    left: 15px;
+    font-size: 12px;
+    color: {{ block.settings.accent_color }};
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 8px;
+    border-radius: 8px;
+    color: #333;
+  }
+
+  .ai-newsletter-popup-button-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding: 16px 32px;
+    background: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+  }
+
+  .ai-newsletter-popup-button-{{ ai_gen_id }}:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  }
+
+  .ai-newsletter-popup-button-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .ai-newsletter-popup-button-{{ ai_gen_id }}:hover::before {
+    left: 100%;
+  }
+
+  .ai-newsletter-popup-button-{{ ai_gen_id }} .ai-ripple-{{ ai_gen_id }} {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ai-ripple-animation-{{ ai_gen_id }} 0.6s linear;
+  }
+
+  @keyframes ai-ripple-animation-{{ ai_gen_id }} {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  .ai-newsletter-popup-success-{{ ai_gen_id }},
+  .ai-newsletter-popup-error-{{ ai_gen_id }} {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .ai-newsletter-popup-success-{{ ai_gen_id }} {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+
+  .ai-newsletter-popup-error-{{ ai_gen_id }} {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-newsletter-popup-container-{{ ai_gen_id }} {
+      padding: 30px 20px;
+      margin: 20px;border-radius: 20px;
+    }
+
+    .ai-newsletter-popup-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-newsletter-popup-description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<newsletter-popup-{{ ai_gen_id }}
+  class="ai-newsletter-popup-overlay-{{ ai_gen_id }}"
+  data-show-delay="{{ block.settings.show_delay }}"
+  data-cookie-duration="{{ block.settings.cookie_duration }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-newsletter-popup-background-{{ ai_gen_id }}"></div>
+  
+  <div class="ai-newsletter-popup-particles-{{ ai_gen_id }}">
+    {% for i in (1..12) %}
+      {% assign delay = forloop.index | times: 0.5 %}
+      {% assign left = forloop.index | times: 8 | modulo: 100 %}
+      {% assign duration = forloop.index | modulo: 3 | plus: 4 %}
+      <div 
+        class="ai-newsletter-popup-particle-{{ ai_gen_id }}"
+        style="
+          left: {{ left }}%;
+          top: {{ forloop.index | times: 7 | modulo: 100 }}%;
+          animation-delay: {{ delay }}s;
+          animation-duration: {{ duration }}s;"
+      ></div>
+    {% endfor %}
+  </div>
+
+  <div class="ai-newsletter-popup-container-{{ ai_gen_id }}">
+    <button class="ai-newsletter-popup-close-{{ ai_gen_id }}" aria-label="Close popup">
+      ×
+    </button>
+
+    <h2 class="ai-newsletter-popup-title-{{ ai_gen_id }}">
+      {{ block.settings.popup_title }}
+    </h2>
+
+    <p class="ai-newsletter-popup-description-{{ ai_gen_id }}">
+      {{ block.settings.popup_description }}
+    </p>
+
+    {% form 'contact' %}
+      <div class="ai-newsletter-popup-form-{{ ai_gen_id }}">
+        <div class="ai-newsletter-popup-input-wrapper-{{ ai_gen_id }}">
+          <input
+            type="email"
+            name="contact[email]"
+            class="ai-newsletter-popup-input-{{ ai_gen_id }}"
+            placeholder=" "
+            value="{{ form.email }}"
+            aria-required="true"
+            autocomplete="email"
+            required
+          >
+          <label class="ai-newsletter-popup-label-{{ ai_gen_id }}">
+            {{ block.settings.email_placeholder }}
+          </label>
+        </div>
+
+        <button type="submit" class="ai-newsletter-popup-button-{{ ai_gen_id }}">
+          {{ block.settings.button_text }}
+        </button>
+
+        {% if form.posted_successfully? %}
+          <div class="ai-newsletter-popup-success-{{ ai_gen_id }}">
+            {{ block.settings.success_message }}
+          </div>
+        {% endif %}
+
+        {% if form.errors %}
+          <div class="ai-newsletter-popup-error-{{ ai_gen_id }}">
+            {{ form.errors.messages.email }}
+          </div>
+        {% endif %}
+      </div>
+    {% endform %}
+  </div>
+</newsletter-popup-{{ ai_gen_id }}>
+
+<script>
+(function() {
+  class NewsletterPopup{{ ai_gen_id }} extends HTMLElement {
+    constructor() {
+      super();
+      this.cookieName = 'newsletter_popup_{{ ai_gen_id }}_dismissed';
+      this.showDelay = parseInt(this.dataset.showDelay) * 1000;
+      this.cookieDuration = parseInt(this.dataset.cookieDuration);
+      this.isShown = false;
+    }
+
+    connectedCallback() {
+      if (this.getCookie(this.cookieName)) {
+        return;
+      }
+
+      this.setupEventListeners();
+      this.schedulePopup();
+      this.checkFormSuccess();
+    }
+
+    setupEventListeners() {
+      const closeButton = this.querySelector('.ai-newsletter-popup-close-{{ ai_gen_id }}');
+      const submitButton = this.querySelector('.ai-newsletter-popup-button-{{ ai_gen_id }}');
+      const overlay = this;
+
+      closeButton.addEventListener('click', () => {
+        closeButton.classList.add('spinning');
+        setTimeout(() => {
+          this.hidePopup();
+          this.setCookie();}, 300);
+      });
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          this.hidePopup();
+          this.setCookie();
+        }
+      });
+
+      submitButton.addEventListener('click', (e) => {
+        this.createRipple(e, submitButton);
+      });document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isShown) {
+          this.hidePopup();
+          this.setCookie();
+        }
+      });
+    }
+
+    createRipple(event, button) {
+      const rect = button.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = event.clientX - rect.left - size / 2;
+      const y = event.clientY - rect.top - size / 2;
+      const ripple = document.createElement('span');
+      ripple.className = 'ai-ripple-{{ ai_gen_id }}';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      button.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+
+    schedulePopup() {
+      setTimeout(() => {
+        this.showPopup();
+      }, this.showDelay);
+    }
+
+    showPopup() {
+      this.isShown = true;
+      this.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      const input = this.querySelector('.ai-newsletter-popup-input-{{ ai_gen_id }}');
+      setTimeout(() => {
+        input.focus();
+      }, 400);
+    }
+
+    hidePopup() {
+      this.isShown = false;
+      this.classList.remove('active');
+      document.body.style.overflow = '';}
+
+    checkFormSuccess() {
+      const successMessage = this.querySelector('.ai-newsletter-popup-success-{{ ai_gen_id }}');
+      if (successMessage) {
+        this.showPopup();
+        setTimeout(() => {
+          this.hidePopup();
+          this.setCookie();
+        }, 3000);
+      }
+    }
+
+    setCookie() {
+      const date = new Date();
+      date.setTime(date.getTime() + (this.cookieDuration * 24 * 60 * 60 * 1000));
+      document.cookie = `${this.cookieName}=true; expires=${date.toUTCString()}; path=/`;
+    }
+
+    getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    }
+  }
+
+  customElements.define('newsletter-popup-{{ ai_gen_id }}', NewsletterPopup{{ ai_gen_id }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Newsletter Popup",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "popup_title",
+      "label": "Popup title",
+      "default": "Stay in the loop"
+    },
+    {
+      "type": "textarea",
+      "id": "popup_description",
+      "label": "Description",
+      "default": "Subscribe to our newsletter for exclusive offers and updates."
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Thank you for subscribing!"
+    },
+    {
+      "type": "header",
+      "content": "Timing"
+    },
+    {
+      "type": "range",
+      "id": "show_delay",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "label": "Show delay",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "cookie_duration",
+      "min": 1,
+      "max": 90,
+      "step": 1,
+      "unit": "d",
+      "label": "Cookie duration",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#007bff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "#007bff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_1",
+      "label": "Gradient color 1",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_2",
+      "label": "Gradient color 2",
+      "default": "#764ba2"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_3",
+      "label": "Gradient color 3",
+      "default": "#f093fb"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter Popup"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

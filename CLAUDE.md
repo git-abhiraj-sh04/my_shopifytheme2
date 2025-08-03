@@ -4,63 +4,73 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Shopify theme called "Nexus" based on the Dawn theme (v15.3.0). It's a complete e-commerce theme with modern design patterns and extensive customization options.
-
-## Architecture
-
-### Core Structure
-- **assets/**: JavaScript, CSS, and SVG assets for theme functionality
-- **blocks/**: AI-generated Liquid blocks for customizable content
-- **config/**: Theme configuration including settings schema and data
-- **layout/**: Base Liquid layout templates (theme.liquid, password.liquid)
-- **locales/**: Internationalization files for multiple languages
-- **sections/**: Reusable Liquid sections for different page areas
-- **snippets/**: Small, reusable Liquid components
-- **templates/**: Page templates and customer account templates
-
-### Key Components
-- **Product System**: Product display, variants, media gallery, and forms
-- **Cart System**: Drawer-based cart with notifications and live updates
-- **Search**: Predictive search with faceted filtering
-- **Collections**: Product grid with filtering and sorting
-- **Customer Portal**: Complete account management system
-
-### Asset Organization
-- CSS components follow BEM-like naming: `component-*.css`
-- JavaScript modules are feature-specific: `product-*.js`, `cart-*.js`
-- SVG icons use semantic naming: `icon-*.svg`
+This is a Shopify theme based on Dawn (v15.3.0) with extensive customizations for electronics/tech products. Features AI-generated blocks, interactive hotspots, and modern e-commerce functionality.
 
 ## Development Commands
 
-This is a Shopify theme project. Development typically involves:
+**Primary Commands:**
+- `shopify theme dev` - Start local development server with live reload
+- `shopify theme push` - Deploy changes to connected store
+- `shopify theme pull` - Sync theme files from Shopify store
+- `shopify theme check` - Validate theme code and performance
 
-1. **Shopify CLI**: Use `shopify theme dev` to start local development server
-2. **Theme Push**: Use `shopify theme push` to deploy changes
-3. **Theme Pull**: Use `shopify theme pull` to sync from Shopify
+**Store Connection:**
+- Use `shopify theme list` to see available themes
+- Connect to specific store with `shopify theme dev --store=STORE_NAME`
 
-Note: No package.json found - this uses Shopify's native Liquid templating system.
+## Architecture
 
-## File Patterns
+### Event System
+- **pubsub.js**: Central event bus for component communication
+- Pattern: `subscribe(eventName, callback)` and `publish(eventName, data)`
+- Key events: `PUB_SUB_EVENTS.cartUpdate`, custom element interactions
 
-### Liquid Templates
-- Sections use `{% schema %}` blocks for theme customization
-- Snippets are included with `{% render 'snippet-name' %}`
-- Localization uses `{{ 'key' | t }}` syntax
+### Custom Elements
+- Web Components architecture with `customElements.define()`
+- Cart system: `CartItems`, `CartRemoveButton`, `SlidingCartItems`
+- Product system: `ProductInfo`, `ProductForm`, `VariantPicker`
+- All elements extend `HTMLElement` with lifecycle methods
 
-### JavaScript Architecture
-- Uses ES6 modules with `pubsub.js` for event communication
-- DOM manipulation without frameworks
-- Lazy loading for performance optimization
+### Template Structure
+- **templates/*.json**: Page-level configuration with section references
+- **sections/*.liquid**: Reusable UI components with schema definitions
+- **snippets/*.liquid**: Micro-components for repeated patterns
+- **blocks/**: AI-generated interactive elements with hotspot functionality
 
-### CSS Structure
-- Component-based CSS organization
-- CSS custom properties for theming
-- Mobile-first responsive design
+### Asset Pipeline
+- No build system - direct Liquid asset references
+- CSS: Component-based with `component-*.css` naming
+- JS: Module-based with deferred loading via `defer="defer"`
+- Icons: Inline SVG system with `icon-*.svg` files
 
-## Important Considerations
+## Key Patterns
 
-- All changes should maintain Shopify theme standards
-- Liquid syntax and Shopify objects are core to functionality
-- Performance optimization is critical for e-commerce
-- Accessibility compliance is required
-- Multi-language support must be maintained
+### Section Development
+```liquid
+{% schema %}
+{
+  "name": "Section Name",
+  "settings": [...],
+  "blocks": [...],
+  "presets": [...]
+}
+{% endschema %}
+```
+
+### Asset Loading
+```liquid
+{{ 'component-name.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'script-name.js' | asset_url }}" defer="defer"></script>
+```
+
+### AI Block Integration
+- Blocks prefixed with `ai_gen_block_*` contain interactive features
+- Hotspot system with tooltip positioning and styling options
+- Modal popups for forms and user interactions
+
+## Critical Considerations
+
+- **Performance**: Defer non-critical JS, optimize images, minimize CSS
+- **Shopify Objects**: Use `product`, `cart`, `customer` objects correctly
+- **Localization**: All user-facing text must use `{{ 'key' | t }}` syntax
+- **Responsive**: Mobile-first approach with progressive enhancement

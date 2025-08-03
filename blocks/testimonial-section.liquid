@@ -1,0 +1,965 @@
+{% comment %}
+  Testimonials Block with Glassmorphic Design and Lenis + GSAP Animations
+  Configurable testimonials with proper Shopify Liquid syntax
+{% endcomment %}
+
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-testimonials-section-{{ ai_gen_id }} {
+    height: 200vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d30 100%);
+    position: relative;
+    overflow: hidden;
+    font-family: Slussen, system-ui, -apple-system, sans-serif;
+  }
+
+  .ai-testimonials-section-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 152, 162, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .ai-testimonials-container-{{ ai_gen_id }} {
+    width: 95%;
+    margin: auto;
+  }
+
+  .ai-testimonials-content-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 5%;
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+
+  .ai-testimonials-col-{{ ai_gen_id }} {
+    width: 45%;
+  }
+
+  .ai-testimonials-col-left-{{ ai_gen_id }} {
+    height: 100%;
+    position: sticky;
+    top: 100px;
+  }
+
+  .ai-testimonials-heading-{{ ai_gen_id }} {
+    font-size: clamp(40px, 8vw, {{ block.settings.heading_size }}px);
+    font-weight: 900;
+    font-stretch: compressed;
+    line-height: 85%;
+    border-left: 3px solid {{ block.settings.accent_color }};
+    padding: 25px;
+    margin: 0 0 40px 0;
+    text-transform: uppercase;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-testimonials-heading-{{ ai_gen_id }} span {
+    display: block;
+  }
+
+  .ai-about-nexus-{{ ai_gen_id }} {
+    padding: 30px;
+    background: rgba(255, 255, 255, {{ block.settings.card_opacity | divided_by: 100.0 }});
+    backdrop-filter: blur({{ block.settings.card_blur }}px);
+    -webkit-backdrop-filter: blur({{ block.settings.card_blur }}px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .ai-about-nexus-{{ ai_gen_id }} h3 {
+    font-size: {{ block.settings.about_title_size }}px;
+    font-weight: 700;
+    font-stretch: expanded;
+    color: {{ block.settings.accent_color }};
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-about-nexus-{{ ai_gen_id }} p {
+    font-size: {{ block.settings.about_text_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.about_text_color }};
+    margin-bottom: 30px;
+  }
+
+  .ai-nexus-stats-{{ ai_gen_id }} {
+    display: flex;
+    gap: 30px;
+  }
+
+  .ai-stat-item-{{ ai_gen_id }} {
+    text-align: center;
+  }
+
+  .ai-stat-number-{{ ai_gen_id }} {
+    display: block;
+    font-size: 28px;
+    font-weight: 900;
+    color: {{ block.settings.accent_color }};
+    line-height: 1;
+  }
+
+  .ai-stat-label-{{ ai_gen_id }} {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-testimonials-col-right-{{ ai_gen_id }} {
+    width: 45%;
+  }
+
+  .ai-testimonial-item-{{ ai_gen_id }} {
+    margin-bottom: 60px;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+  }
+
+  .ai-glass-card-{{ ai_gen_id }} {
+    background: rgba(255, 255, 255, {{ block.settings.card_opacity | divided_by: 100.0 }});
+    backdrop-filter: blur({{ block.settings.card_blur }}px);
+    -webkit-backdrop-filter: blur({{ block.settings.card_blur }}px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    position: relative;
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 8px 16px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-glass-card-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.4) 20%, 
+      rgba(255, 255, 255, 0.6) 50%, 
+      rgba(255, 255, 255, 0.4) 80%, 
+      transparent
+    );
+    border-radius: {{ block.settings.card_border_radius }}px {{ block.settings.card_border_radius }}px 0 0;
+  }
+
+  .ai-glass-card-{{ ai_gen_id }}::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background: linear-gradient(145deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      rgba(255, 255, 255, 0.05) 50%, 
+      rgba(0, 0, 0, 0.05) 100%
+    );
+    border-radius: calc({{ block.settings.card_border_radius }}px - 3px);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ai-glass-card-{{ ai_gen_id }}:hover {
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(-10px) translateZ(20px);
+    background: rgba(255, 255, 255, {{ block.settings.card_opacity | divided_by: 100.0 | plus: 0.06 }});
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 30px 60px rgba(0, 0, 0, 0.5),
+      0 15px 30px rgba(0, 0, 0, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .ai-testimonial-content-{{ ai_gen_id }} {
+    position: relative;
+    z-index: 2;
+  }
+
+  .ai-stars-{{ ai_gen_id }} {
+    color: {{ block.settings.star_color }};
+    font-size: 18px;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .ai-star-{{ ai_gen_id }} {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ai-star-empty-{{ ai_gen_id }} {
+    color: {{ block.settings.star_empty_color }};
+  }
+
+  .ai-testimonial-content-{{ ai_gen_id }} p {
+    font-size: {{ block.settings.testimonial_text_size }}px;
+    line-height: 1.7;
+    color: {{ block.settings.testimonial_text_color }};
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .ai-customer-info-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ai-customer-avatar-{{ ai_gen_id }} {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, {{ block.settings.accent_color }}, #7877c6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ai-customer-details-{{ ai_gen_id }} h4 {
+    font-size: {{ block.settings.customer_name_size }}px;
+    font-weight: 700;
+    font-stretch: normal;
+    color: {{ block.settings.customer_name_color }};
+    margin: 0 0 4px 0;
+  }
+
+  .ai-customer-details-{{ ai_gen_id }} span {
+    font-size: {{ block.settings.customer_role_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.customer_role_color }};
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-testimonials-section-{{ ai_gen_id }} {
+      height: auto;
+      min-height: 100vh;
+    }
+
+    .ai-testimonials-content-{{ ai_gen_id }} {
+      flex-direction: column;
+      padding-top: 50px;
+    }
+    
+    .ai-testimonials-col-{{ ai_gen_id }}, 
+    .ai-testimonials-col-left-{{ ai_gen_id }}, 
+    .ai-testimonials-col-right-{{ ai_gen_id }} {
+      width: 100%;
+    }
+    
+    .ai-testimonials-col-left-{{ ai_gen_id }} {
+      position: static;
+      margin-bottom: 50px;
+    }
+    
+    .ai-testimonials-heading-{{ ai_gen_id }} {
+      font-size: 40px;
+      padding: 20px;
+    }
+    
+    .ai-about-nexus-{{ ai_gen_id }} {
+      padding: 20px;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .ai-nexus-stats-{{ ai_gen_id }} {
+      justify-content: center;
+    }
+    
+    .ai-testimonial-item-{{ ai_gen_id }} {
+      margin-bottom: 30px;
+    }
+    
+    .ai-glass-card-{{ ai_gen_id }} {
+      padding: 20px;
+      /* Simplified mobile styles for better performance */
+      transform: none !important;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .ai-glass-card-{{ ai_gen_id }}:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 
+        0 12px 30px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .ai-glass-card-{{ ai_gen_id }}::after {
+      display: none;
+    }
+
+    /* Enhanced text readability on mobile */
+    .ai-testimonial-content-{{ ai_gen_id }} p {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .ai-customer-details-{{ ai_gen_id }} h4,
+    .ai-customer-details-{{ ai_gen_id }} span {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+{% endstyle %}
+
+<testimonials-section-{{ ai_gen_id }}
+  id="testimonials-{{ ai_gen_id }}"
+  class="ai-testimonials-section-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-testimonials-container-{{ ai_gen_id }}">
+    <div class="ai-testimonials-content-{{ ai_gen_id }}">
+      <!-- Left Column - About Company -->
+      <div class="ai-testimonials-col-{{ ai_gen_id }} ai-testimonials-col-left-{{ ai_gen_id }}">
+        <h2 class="ai-testimonials-heading-{{ ai_gen_id }}">
+          {% if block.settings.heading_line_1 != blank %}
+            <span>{{ block.settings.heading_line_1 }}</span>
+          {% endif %}
+          {% if block.settings.heading_line_2 != blank %}
+            <span>{{ block.settings.heading_line_2 }}</span>
+          {% endif %}
+        </h2>
+        <div class="ai-about-nexus-{{ ai_gen_id }}">
+          {% if block.settings.about_title != blank %}
+            <h3>{{ block.settings.about_title }}</h3>
+          {% endif %}
+          {% if block.settings.about_description != blank %}
+            <p>{{ block.settings.about_description }}</p>
+          {% endif %}
+          {% if block.settings.show_stats %}
+            <div class="ai-nexus-stats-{{ ai_gen_id }}">
+              {% if block.settings.stat_1_number != blank %}
+                <div class="ai-stat-item-{{ ai_gen_id }}">
+                  <span class="ai-stat-number-{{ ai_gen_id }}">{{ block.settings.stat_1_number }}</span>
+                  <span class="ai-stat-label-{{ ai_gen_id }}">{{ block.settings.stat_1_label }}</span>
+                </div>
+              {% endif %}
+              {% if block.settings.stat_2_number != blank %}
+                <div class="ai-stat-item-{{ ai_gen_id }}">
+                  <span class="ai-stat-number-{{ ai_gen_id }}">{{ block.settings.stat_2_number }}</span>
+                  <span class="ai-stat-label-{{ ai_gen_id }}">{{ block.settings.stat_2_label }}</span>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Column - Testimonials -->
+      <div class="ai-testimonials-col-{{ ai_gen_id }} ai-testimonials-col-right-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign testimonial_enabled_key = 'testimonial_' | append: i | append: '_enabled'
+            assign testimonial_rating_key = 'testimonial_' | append: i | append: '_rating'
+            assign testimonial_text_key = 'testimonial_' | append: i | append: '_text'
+            assign testimonial_name_key = 'testimonial_' | append: i | append: '_name'
+            assign testimonial_role_key = 'testimonial_' | append: i | append: '_role'
+
+            assign testimonial_enabled = block.settings[testimonial_enabled_key]
+            assign testimonial_rating = block.settings[testimonial_rating_key]
+            assign testimonial_text = block.settings[testimonial_text_key]
+            assign testimonial_name = block.settings[testimonial_name_key]
+            assign testimonial_role = block.settings[testimonial_role_key]
+          %}
+
+          {% if testimonial_enabled and testimonial_text != blank %}
+            <div class="ai-testimonial-item-{{ ai_gen_id }} ai-glass-card-{{ ai_gen_id }}">
+              <div class="ai-testimonial-content-{{ ai_gen_id }}">
+                {% if block.settings.show_stars %}
+                  <div class="ai-stars-{{ ai_gen_id }}">
+                    {% for star in (1..5) %}
+                      <svg
+                        class="ai-star-{{ ai_gen_id }} {% if star > testimonial_rating %}ai-star-empty-{{ ai_gen_id }}{% endif %}"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                
+                {% if testimonial_text != blank %}
+                  <p>"{{ testimonial_text }}"</p>
+                {% endif %}
+                
+                <div class="ai-customer-info-{{ ai_gen_id }}">
+                  {% if testimonial_name != blank %}
+                    <div class="ai-customer-avatar-{{ ai_gen_id }}">
+                      {% assign name_parts = testimonial_name | split: ' ' %}
+                      {% if name_parts.size > 1 %}
+                        {{ name_parts.first | slice: 0 }}{{ name_parts.last | slice: 0 }}
+                      {% else %}
+                        {{ testimonial_name | slice: 0, 2 }}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  <div class="ai-customer-details-{{ ai_gen_id }}">
+                    {% if testimonial_name != blank %}
+                      <h4>{{ testimonial_name }}</h4>
+                    {% endif %}
+                    {% if testimonial_role != blank %}
+                      <span>{{ testimonial_role }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</testimonials-section-{{ ai_gen_id }}>
+
+<script>
+(function() {
+  class TestimonialsSection{{ ai_gen_id }} extends HTMLElement {
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      this.initializeAnimations();
+    }
+
+    initializeAnimations() {
+      // Initialize Lenis
+      if (typeof Lenis !== 'undefined') {
+        const lenis = new Lenis({
+          duration: {{ block.settings.scroll_duration | divided_by: 10.0 }},
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+        });
+
+        function raf(time) {
+          lenis.raf(time);
+          if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.update();
+          }
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+      }
+
+      // GSAP animations
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        const testimonialsSection = this;
+        const colLeft = this.querySelector(".ai-testimonials-col-left-{{ ai_gen_id }}");
+        
+        if (colLeft) {
+          const timeln = gsap.timeline({ paused: true });
+          timeln.fromTo(colLeft, {y: 0}, {y: '{{ block.settings.parallax_distance }}vh', duration: 1, ease: 'none'}, 0);
+
+          ScrollTrigger.create({
+            animation: timeln,
+            trigger: testimonialsSection,
+            start: 'top top',
+            end: 'bottom center',
+            scrub: true
+          });
+        }
+
+        // Animate testimonial cards on scroll
+        const testimonialItems = this.querySelectorAll('.ai-testimonial-item-{{ ai_gen_id }}');
+        
+        testimonialItems.forEach((item, index) => {
+          gsap.fromTo(item, 
+            {
+              opacity: 0,
+              y: 50,
+              scale: 0.9
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+              }
+            }
+          );
+
+          // Add parallax effect to glass cards
+          if ({{ block.settings.enable_card_parallax | json }}) {
+            gsap.to(item, {
+              yPercent: -20,
+              ease: "none",
+              scrollTrigger: {
+                trigger: item,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+              }
+            });
+          }
+        });
+      }
+    }
+  }
+
+  customElements.define('testimonials-section-{{ ai_gen_id }}', TestimonialsSection{{ ai_gen_id }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonials Section",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_1",
+      "label": "Heading Line 1",
+      "default": "Customer"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_2",
+      "label": "Heading Line 2",
+      "default": "Testimonials"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 30,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading font size",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#2C3E50"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#FF98A2"
+    },
+    {
+      "type": "header",
+      "content": "About Section"
+    },
+    {
+      "type": "text",
+      "id": "about_title",
+      "label": "About title",
+      "default": "About Nexus"
+    },
+    {
+      "type": "textarea",
+      "id": "about_description",
+      "label": "About description",
+      "default": "We sell premium laptops and cutting-edge accessories to power your digital lifestyle. From high-performance gaming rigs to sleek ultrabooks, we provide technology that drives innovation and productivity."
+    },
+    {
+      "type": "range",
+      "id": "about_title_size",
+      "min": 16,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "About title size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "about_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "About text size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "about_text_color",
+      "label": "About text color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Statistics"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stats",
+      "label": "Show statistics",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "stat_1_number",
+      "label": "Statistic 1 number",
+      "default": "10K+"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Statistic 1 label",
+      "default": "Happy Customers"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_number",
+      "label": "Statistic 2 number",
+      "default": "500+"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Statistic 2 label",
+      "default": "Products"
+    },
+    {
+      "type": "header",
+      "content": "Display Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Show star ratings",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "range",
+      "id": "card_opacity",
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "label": "Card background opacity",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_blur",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Card blur amount",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Card padding",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Testimonial text size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "testimonial_text_color",
+      "label": "Testimonial text color",
+      "default": "#0D0D0D"
+    },
+    {
+      "type": "range",
+      "id": "customer_name_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Customer name size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "customer_name_color",
+      "label": "Customer name color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "customer_role_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Customer role size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "customer_role_color",
+      "label": "Customer role color",
+      "default": "#FFFFFF99"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#FFD700"
+    },
+    {
+      "type": "color",
+      "id": "star_empty_color",
+      "label": "Empty star color",
+      "default": "#DEE2E6"
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "range",
+      "id": "scroll_duration",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "s",
+      "label": "Scroll duration",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "parallax_distance",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "label": "Parallax distance",
+      "default": 50
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_card_parallax",
+      "label": "Enable card parallax effect",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_1_enabled",
+      "label": "Show testimonial 1",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "testimonial_1_rating",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Rating",
+      "default": 5
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_1_text",
+      "label": "Testimonial text",
+      "default": "Amazing quality laptops! Got my gaming setup from Nexus and couldn't be happier. The customer service was exceptional and delivery was super fast."
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_name",
+      "label": "Customer name",
+      "default": "Sarah Mitchell"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_role",
+      "label": "Customer role",
+      "default": "Graphic Designer"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_2_enabled",
+      "label": "Show testimonial 2",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "testimonial_2_rating",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Rating",
+      "default": 5
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_2_text",
+      "label": "Testimonial text",
+      "default": "Best tech store ever! Their MacBook selection is incredible and the accessories are top-notch. Highly recommend for any professional setup."
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_name",
+      "label": "Customer name",
+      "default": "James Rodriguez"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_role",
+      "label": "Customer role",
+      "default": "Software Developer"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_3_enabled",
+      "label": "Show testimonial 3",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "testimonial_3_rating",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Rating",
+      "default": 4
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_3_text",
+      "label": "Testimonial text",
+      "default": "Nexus transformed my work-from-home setup completely. The laptop I bought has been a game-changer for my productivity. Excellent quality and fair prices!"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_name",
+      "label": "Customer name",
+      "default": "Emily Watson"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_role",
+      "label": "Customer role",
+      "default": "Marketing Manager"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_4_enabled",
+      "label": "Show testimonial 4",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "testimonial_4_rating",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Rating",
+      "default": 5
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_4_text",
+      "label": "Testimonial text",
+      "default": "Outstanding experience from start to finish. The team helped me choose the perfect laptop for my studies and threw in some great accessories. Will definitely shop here again!"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_name",
+      "label": "Customer name",
+      "default": "Michael Chen"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_role",
+      "label": "Customer role",
+      "default": "Computer Science Student"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials Section"
+    }
+  ]
+}
+{% endschema %}

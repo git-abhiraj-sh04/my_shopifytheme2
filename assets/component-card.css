@@ -44,7 +44,7 @@
 .card--standard .card__inner {
   position: relative;
   box-sizing: border-box;
-  border-radius: var(--border-radius);
+  border-radius: 12px;
   border: var(--border-width) solid rgba(var(--color-foreground), var(--border-opacity));
 }
 
@@ -57,7 +57,7 @@
   height: calc(var(--border-width) * 2 + 100%);
   top: calc(var(--border-width) * -1);
   left: calc(var(--border-width) * -1);
-  border-radius: var(--border-radius);
+  border-radius: 12px;
   box-shadow: var(--shadow-horizontal-offset) var(--shadow-vertical-offset) var(--shadow-blur-radius)
     rgba(var(--color-shadow), var(--shadow-opacity));
 }
@@ -77,12 +77,12 @@
   overflow: hidden;
   /* Fix for Safari border bug on hover */
   z-index: 0;
-  border-radius: calc(var(--border-radius) - var(--border-width) - var(--image-padding));
+  border-radius: 12px;
 }
 
 .card--card .card__inner .card__media {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 
 .card--standard.card--text {
@@ -102,6 +102,18 @@
 
 .card .media {
   width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.media--transparent {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.media--hover-effect {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .card__media {
@@ -294,6 +306,22 @@
   object-fit: cover;
   object-position: center center;
   width: 100%;
+  border-radius: 12px;
+}
+
+.card .motion-reduce {
+  border-radius: 12px;
+}
+
+.card img,
+.card-wrapper img {
+  border-radius: 12px;
+}
+
+.card .media--transparent,
+.card .media--hover-effect {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .card__inner:not(.ratio) > .card__content {
