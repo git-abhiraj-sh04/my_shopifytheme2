@@ -8,6 +8,7 @@ class SlidingCartPanel extends HTMLElement {
     this.initializeTabs();
     this.initializeRecentlyViewed();
     this.setupDynamicStyles();
+    this.initializeGiftWrap();
   }
 
   setHeaderCartIconAccessibility() {
@@ -147,9 +148,9 @@ class SlidingCartPanel extends HTMLElement {
   }
 
   formatMoney(cents) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(cents / 100);
   }
 
@@ -173,6 +174,74 @@ class SlidingCartPanel extends HTMLElement {
         settings.animation_ease
       );
     }
+  }
+
+  initializeGiftWrap() {
+    const giftWrapCheckbox = this.querySelector('.sliding-cart__gift-wrap-checkbox');
+    if (!giftWrapCheckbox) return;
+
+    // Set initial state
+    this.giftWrapPrice = 90000; // 900.00 in cents (Shopify uses cents for calculations)
+    
+    // Add event listener for checkbox changes
+    giftWrapCheckbox.addEventListener('change', (event) => {
+      this.handleGiftWrapChange(event.target.checked);
+    });
+  }
+
+  handleGiftWrapChange(isChecked) {
+    const summaryPriceElement = this.querySelector('.sliding-cart__summary-price');
+    if (!summaryPriceElement) return;
+
+    // Get current total (remove currency symbols and convert to number)
+    const currentTotalText = summaryPriceElement.textContent;
+    const currentTotal = this.parseMoney(currentTotalText);
+    
+    let newTotal;
+    if (isChecked) {
+      // Add gift wrap price
+      newTotal = currentTotal + this.giftWrapPrice;
+    } else {
+      // Subtract gift wrap price
+      newTotal = currentTotal - this.giftWrapPrice;
+    }
+    
+    // Update the display
+    summaryPriceElement.textContent = this.formatMoney(newTotal);
+    
+    // Save to cart attributes
+    this.updateCartAttributes(isChecked);
+  }
+
+  parseMoney(moneyString) {
+    // Remove currency symbols and convert to cents
+    // This handles formats like "₹1,234.56" or "$1,234.56"
+    const numbers = moneyString.replace(/[^\d.-]/g, '');
+    return Math.round(parseFloat(numbers) * 100);
+  }
+
+  updateCartAttributes(isGiftWrapSelected) {
+    const formData = {
+      attributes: {
+        gift_wrap: isGiftWrapSelected ? 'yes' : ''
+      }
+    };
+
+    fetch('/cart/update.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(cart => {
+      // Update cart icon if needed
+      this.updateCartIcon(cart);
+    })
+    .catch(error => {
+      console.error('Error updating cart attributes:', error);
+    });
   }
 
 
@@ -217,6 +286,9 @@ class SlidingCartPanel extends HTMLElement {
 
     // Update cart count in tab
     this.updateCartCount();
+    
+    // Initialize gift wrap state
+    this.initializeGiftWrapState();
   }
 
   scrollToCheckout() {
@@ -254,6 +326,18 @@ class SlidingCartPanel extends HTMLElement {
           console.error('Error updating cart count:', error);
         });
     }
+  }
+
+  initializeGiftWrapState() {
+    // Fetch current cart state and sync gift wrap
+    fetch('/cart.js')
+      .then(response => response.json())
+      .then(cart => {
+        this.syncGiftWrapState(cart);
+      })
+      .catch(error => {
+        console.error('Error fetching cart for gift wrap state:', error);
+      });
   }
 
   renderContents(parsedState) {
@@ -531,9 +615,18 @@ class SlidingCartPanel extends HTMLElement {
     })
     .then(cart => {
       // Sync actual cart count with server response
-      this.updateCartCount();
+      this.updateCartIcon(cart);
       // Update cart total price
       this.updateCartTotal(cart.total_price);
+      
+      // Check if cart is empty and update display
+      if (cart.item_count === 0) {
+        this.classList.add('is-empty');
+        const cartItems = this.querySelector('.sliding-cart__items-wrapper');
+        if (cartItems) {
+          cartItems.innerHTML = '<p style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">Your cart is empty</p>';
+        }
+      }
     })
     .catch(error => {
       console.error('Error removing item:', error);
@@ -613,6 +706,35 @@ class SlidingCartPanel extends HTMLElement {
     if (cartCountElement) {
       cartCountElement.textContent = cart.item_count;
     }
+    
+    // Update gift wrap state if cart has attributes
+    this.syncGiftWrapState(cart);
+  }
+
+  syncGiftWrapState(cart) {
+    const giftWrapCheckbox = this.querySelector('.sliding-cart__gift-wrap-checkbox');
+    if (!giftWrapCheckbox) return;
+
+    // Check if gift wrap is in cart attributes
+    const isGiftWrapSelected = cart.attributes && cart.attributes.gift_wrap === 'yes';
+    
+    // Update checkbox state without triggering change event
+    giftWrapCheckbox.checked = isGiftWrapSelected;
+    
+    // Update the total to reflect gift wrap pricing
+    this.updateTotalForGiftWrap(cart, isGiftWrapSelected);
+  }
+
+  updateTotalForGiftWrap(cart, isGiftWrapSelected) {
+    const summaryPriceElement = this.querySelector('.sliding-cart__summary-price');
+    if (!summaryPriceElement) return;
+
+    let displayTotal = cart.total_price;
+    if (isGiftWrapSelected) {
+      displayTotal += this.giftWrapPrice;
+    }
+    
+    summaryPriceElement.textContent = this.formatMoney(displayTotal);
   }
 
   // Utility function for notifications
@@ -694,6 +816,19 @@ class SlidingCartPanel extends HTMLElement {
     // If no items left, show empty cart state
     if (remainingItems.length === 0) {
       this.classList.add('is-empty');
+      if (itemsWrapper) {
+        itemsWrapper.innerHTML = '<p style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">Your cart is empty</p>';
+      }
+      
+      // Also update cart icon to show 0
+      const cartIconBubble = document.querySelector('#cart-icon-bubble');
+      if (cartIconBubble) {
+        const cartCount = cartIconBubble.querySelector('.cart-count-bubble');
+        if (cartCount) {
+          cartCount.textContent = '0';
+          cartCount.style.display = 'none';
+        }
+      }
     }
   }
 
@@ -709,8 +844,8 @@ class SlidingCartPanel extends HTMLElement {
 
   // Helper method to format money (basic implementation)
   formatMoney(cents) {
-    const dollars = (cents / 100).toFixed(2);
-    return `$${dollars}`;
+    const rupees = (cents / 100).toFixed(2);
+    return `₹${rupees}`;
   }
 }
 
@@ -859,8 +994,13 @@ handleQuantityClick(event) {
       // Update estimated total immediately
       this.updateCartTotals(cart);
       
-      // Refresh the cart panel content
+      // Sync gift wrap state
       const cartPanel = document.querySelector('sliding-cart-panel');
+      if (cartPanel && cartPanel.syncGiftWrapState) {
+        cartPanel.syncGiftWrapState(cart);
+      }
+      
+      // Refresh the cart panel content
       if (cartPanel && cartPanel.refreshCartPanel) {
         cartPanel.refreshCartPanel();
       }
@@ -915,9 +1055,9 @@ handleQuantityClick(event) {
   }
 
   formatMoney(cents) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(cents / 100);
   }
 
