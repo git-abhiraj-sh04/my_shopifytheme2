@@ -1,8 +1,7 @@
-{% doc %}
+{% comment %}
   @prompt
-    Create an interactive image hotspot component with clean white circular markers that show tooltips on hover. Features minimal aesthetic with breathing animations and smooth hover effects.
-
-{% enddoc %}
+    Create an interactive image hotspot component with pulsating circular markers that show tooltips on hover. Features minimal aesthetic with pulsating ring animations and smooth hover effects.
+{% endcomment %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
 {% style %}
@@ -50,36 +49,89 @@
     z-index: 10;
   }
 
+  /* Pulsating Ring Animation */
+  @keyframes ai-hotspot-pulsate-{{ ai_gen_id }} {
+    0% {
+      transform: scale(1);
+      opacity: {{ block.settings.ring_opacity | divided_by: 100.0 }};
+    }
+    45% {
+      transform: scale(1.75);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.75);
+      opacity: 0;
+    }
+  }
+
+  @keyframes ai-hotspot-stop-pulsate-{{ ai_gen_id }} {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
   .ai-hotspot-marker-{{ ai_gen_id }} {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .ai-hotspot-ring-{{ ai_gen_id }} {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc({{ block.settings.hotspot_size }}px * 2);
+    height: calc({{ block.settings.hotspot_size }}px * 2);
+    margin: calc(-{{ block.settings.hotspot_size }}px) 0 0 calc(-{{ block.settings.hotspot_size }}px);
+    transform-origin: 50% 50%;
+    border-radius: 50%;
+    border: 1px solid {{ block.settings.ring_color }};
+    opacity: 0;
+    animation: ai-hotspot-pulsate-{{ ai_gen_id }} 3s ease-out infinite;
+  }
+
+  .ai-hotspot-circle-{{ ai_gen_id }} {
+    position: absolute;
+    left: 50%;
+    top: 50%;
     width: {{ block.settings.hotspot_size }}px;
     height: {{ block.settings.hotspot_size }}px;
-    border-radius: 50%;
+    margin: calc(-{{ block.settings.hotspot_size | divided_by: 2 }}px) 0 0 calc(-{{ block.settings.hotspot_size | divided_by: 2 }}px);
     background-color: rgba(255, 255, 255, 0.9);
     border: 2px solid rgba(255, 255, 255, 0.8);
-    cursor: pointer;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
-    animation: ai-hotspot-breathe-{{ ai_gen_id }} 4s infinite ease-in-out;
+    opacity: 0.6;
+    transform-origin: 50% 50%;
   }
 
-  .ai-hotspot-marker-{{ ai_gen_id }}:hover {
+  .ai-hotspot-marker-{{ ai_gen_id }}:hover .ai-hotspot-circle-{{ ai_gen_id }} {
+    opacity: 0.8;
     transform: scale(1.1);
     background-color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-    animation-play-state: paused;
   }
 
-  @keyframes ai-hotspot-breathe-{{ ai_gen_id }} {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
+  .ai-hotspot-marker-{{ ai_gen_id }}:hover .ai-hotspot-ring-{{ ai_gen_id }} {
+    animation: none;
+  }
+
+  .ai-hotspot-marker-{{ ai_gen_id }}:active .ai-hotspot-circle-{{ ai_gen_id }} {
+    transform: scale(0.875);
+  }
+
+  .ai-hotspot-marker-{{ ai_gen_id }}:active .ai-hotspot-ring-{{ ai_gen_id }} {
+    animation: ai-hotspot-stop-pulsate-{{ ai_gen_id }} 0.3s;
   }
 
   .ai-hotspot-center-dot-{{ ai_gen_id }} {
@@ -216,9 +268,16 @@
   }
 
   @media screen and (max-width: 749px) {
-    .ai-hotspot-marker-{{ ai_gen_id }} {
+    .ai-hotspot-ring-{{ ai_gen_id }} {
+      width: calc({{ block.settings.hotspot_size | times: 0.8 }}px * 2);
+      height: calc({{ block.settings.hotspot_size | times: 0.8 }}px * 2);
+      margin: calc(-{{ block.settings.hotspot_size | times: 0.8 }}px) 0 0 calc(-{{ block.settings.hotspot_size | times: 0.8 }}px);
+    }
+
+    .ai-hotspot-circle-{{ ai_gen_id }} {
       width: {{ block.settings.hotspot_size | times: 0.8 }}px;
       height: {{ block.settings.hotspot_size | times: 0.8 }}px;
+      margin: calc(-{{ block.settings.hotspot_size | times: 0.8 | divided_by: 2 }}px) 0 0 calc(-{{ block.settings.hotspot_size | times: 0.8 | divided_by: 2 }}px);
     }
 
     .ai-hotspot-marker-{{ ai_gen_id }}:hover .ai-hotspot-center-dot-{{ ai_gen_id }} {
@@ -275,7 +334,10 @@
           data-hotspot-id="{{ i }}"
         >
           <div class="ai-hotspot-marker-{{ ai_gen_id }}">
-            <div class="ai-hotspot-center-dot-{{ ai_gen_id }}"></div>
+            <span class="ai-hotspot-ring-{{ ai_gen_id }}"></span>
+            <span class="ai-hotspot-circle-{{ ai_gen_id }}">
+              <div class="ai-hotspot-center-dot-{{ ai_gen_id }}"></div>
+            </span>
           </div>
 
           <div
@@ -422,6 +484,22 @@
       "unit": "px",
       "label": "Hotspot size",
       "default": 32
+    },
+    {
+      "type": "color",
+      "id": "ring_color",
+      "label": "Pulsating ring color",
+      "default": "#ed0048"
+    },
+    {
+      "type": "range",
+      "id": "ring_opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Ring opacity",
+      "default": 80
     },
     {
       "type": "header",
